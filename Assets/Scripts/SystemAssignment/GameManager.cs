@@ -186,29 +186,42 @@ public class GameManager : MonoBehaviour
 
     void OnKeepTower(int keptIndex)
     {
+        
+           //     for towers in placedTowers:
+        for (int i = 0; i < placedTowers.Count; i++)
+        {
+            Tower t = placedTowers[i];
 
-        for towers in placedTowers:
+            if (i != keptIndex)
+            {
 
-        if index is not keptIndex:
-			tower.NotKept()
+            } else
+            {
 
-
-            set tower’s sprite to rock sprite and tower’s spriterenderer color to white
-
-        else:
-			note the kept tower’s type and tier
-
-
-            run through the placedTowers list and see if there are any other gems of the same type and tier
-
-
-            if so, combine it with the kept tower, raising the tier of the kept tower by one and changing its sprite to match the new tier, then recalculate its stats
+            }
+            //     if index is not keptIndex:
+            //tower.NotKept()
 
 
-            initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
+            //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
+
+            //     else:
+            //note the kept tower’s type and tier
 
 
-    ChangePhase(1);
+            //         run through the placedTowers list and see if there are any other gems of the same type and tier
+
+
+            //         if so, combine it with the kept tower, raising the tier of the kept tower by one and changing its sprite to match the new tier, then recalculate its stats
+
+
+            //         initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
+        }
+
+
+
+
+        ChangePhase(1);
     }
 
     // manage hover info box
