@@ -1,16 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.U2D;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
     // stats
-    public float moveSpeed = 10
-private float maxHealth, currentHealth;
+    public float moveSpeed = 10;
+    private float maxHealth, currentHealth;
     public bool flying;
 
     // health bar slider in this enemy’s attached screen space canvas
@@ -20,49 +19,49 @@ private float maxHealth, currentHealth;
     public float waypointClearDistance = 0.2f;
 
     // list of waypoints to hit
-    private List<vector2> waypoints;
+    private List<Vector2> waypoints;
 
     // current target waypoint
-    private vector2 targetWaypoint;
+    private Vector2 targetWaypoint;
     private int targetWaypointIndex = 0;
 
     // sprites
-    public sprite groundEnemySprite, flyingEnemySprite;
+    public Sprite groundEnemySprite, flyingEnemySprite;
 
     public UnityEvent onReachedTower, onKilled;
 
     private AudioSource source;
-    public AudioClip hitClip;
+    public AudioClip hitSound;
 
     void start()
     {
-        source = getcomponent<audioSource>();
+        source = GetComponent<AudioSource>();
     }
 
     // called from GameManager
-    public Enemy InitEnemy(float hp, List<vector2> newWaypoints, bool isFlying)
+    public void InitEnemy(float hp, List<Vector2> newWaypoints, bool isFlying)
     {
-        waypoints = newWaypoints
-    
-    maxHealth = hp;
+        waypoints = newWaypoints;
+
+        maxHealth = hp;
         currentHealth = maxHealth;
 
-        targetWaypoint = waypoints[0]
-    
+        targetWaypoint = waypoints[0];
 
-    getcomponent<spriterenderer>().sprite = flying ? flyingEnemySprite : groundEnemySprite;
+
+        GetComponent<SpriteRenderer>().sprite = flying ? flyingEnemySprite : groundEnemySprite;
     }
 
     void update()
     {
-        if (vector2.distance(transform.position, targetwaypoint) < = waypointClearDistance)
+        if (Vector2.Distance(transform.position, targetWaypoint) <= waypointClearDistance)
         {
             // set target waypoint to the next waypoint
             targetWaypointIndex++;
-            if (targetWaypointIndex == waypoints.count)
+            if (targetWaypointIndex == waypoints.Count)
             {
                 // if we hit the final waypoint, reduce the players’ lives and destroy this enemy
-                onReachedTower.invoke();
+                onReachedTower.Invoke();
                 Destroy(gameObject);
 
             }
@@ -72,37 +71,33 @@ private float maxHealth, currentHealth;
             }
         }
         // move this enemy
-        transform.position = vector3.movetowards(transform.position, targetWaypoint, moveSpeed * time.deltatime * gameTimeScale);
+        transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, moveSpeed * Time.deltaTime);
     }
 
-    public void OnTakeDamage(float dmg)
+    public void TakeDamage(float dmg)
     {
-        currenthealth -= dmg;
+        currentHealth -= dmg;
 
         if (currentHealth <= 0)
         {
-            onKilled.invoke();
+            onKilled.Invoke();
+
             // if we’re allowed to use particles by this point, instantiate death particle prefab
             Destroy(gameObject);
         }
         else
         {
-            source.playoneshot(hitSound);
-            Sethealth(currenthealth)
-    
-    }
+            source.PlayOneShot(hitSound);
+            SetHealth(currentHealth);
+
+        }
     }
 
-    void SetHeatlh(float hp)
+    void SetHealth(float hp)
     {
-        currenthealth = hp;
-        slider.setvalue(currenthealth / maxhealth);
+        currentHealth = hp;
+        healthSlider.SetValueWithoutNotify(currentHealth / maxHealth);
     }
 
-    public void OnFastForwardButtonPressed()
-    {
-        fastforwarding = !fastforwarding;
-        gameTimeScale = fastforwarding ? 3 : 1;
-    }
 
 }

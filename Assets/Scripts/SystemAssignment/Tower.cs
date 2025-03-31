@@ -24,18 +24,37 @@ public class Tower : MonoBehaviour
 
     private List<Enemy> enemiesInRange = new List<Enemy>();
 
+    // stats
+    int gemType;
+    float damage;
+    float range;
+    float attackSpeed;
+
+    // prefabs
+    public GameObject projectilePrefab;
+
+    // events
+
     public void InitTower(int xPos, int yPos, int type, float dmg, float range, float atkspd)
     {
-        set xPos, yPos, type, tier, dmg, range, atkspd variables
+        //set xPos, yPos, type, tier, dmg, range, atkspd variables
+        x = xPos;
+        y = yPos;
+        gemType = type;
+        damage = dmg;
+        this.range = range;
+        attackSpeed = atkspd;
+
     }
 
     public void OnKept(UnityEvent roundStart, UnityEvent roundEnd, List<Enemy> enemyList)
     {
-        roundStart.addlistener(OnRoundStart)
+        roundStart.AddListener(OnRoundStart);
+
+
+        roundEnd.AddListener(OnRoundEnd);
     
-    roundEnd.addListener(OnRoundEnd)
-    
-    towerState = 1;
+        towerState = 1;
         allEnemies = enemyList;
     }
 
@@ -59,13 +78,13 @@ public class Tower : MonoBehaviour
     {
         // this coroutine waits until an enemy is in range, and while an enemy is in range, attacks every (atkspeed) seconds
         // first, clear enemies in range list
-        enemiesInRange.clear();
+        enemiesInRange.Clear();
 
         // then, if there are any enemies within range, shoot projectiles
         // while ready to fire, check every frame if there are any enemies in range
         while (true)
         {
-            if (enemiesInRange.count == 0)
+            if (enemiesInRange.Count == 0)
             {
                 CheckIfEnemiesInRange();
                 yield return null;
@@ -76,10 +95,10 @@ public class Tower : MonoBehaviour
                 CheckIfEnemiesInRange();
 
                 // if there’s still an enemy in range, fire and wait the delay
-                if (enemiesInRange.count > 0)
+                if (enemiesInRange.Count > 0)
                 {
                     FireProjectile(enemiesInRange[0]);
-                    yield return new WaitForSeconds(1 / atkSpeed);
+                    yield return new WaitForSeconds(1 / attackSpeed);
 
                 }
             }
@@ -88,11 +107,14 @@ public class Tower : MonoBehaviour
 
     void FireProjectile(Enemy target)
     {
-        GameObject p = Instantiate(projectilePrefab, transform.position, quaternion.identity);
-        Projectile p = p.getcomponent<Projectile>()
-    p.Init(type, target, damage);
-        if (type == sapphire) p.setslowtime(…)
-        else if (type == emerald) p.setpoison(…)
+        GameObject proj = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+
+        Projectile p = proj.GetComponent<Projectile>();
+
+        p.Init(gemType, damage, target);
+
+        //if (type == sapphire) p.SetSlowTime(…)
+        //else if (type == emerald) p.setpoison(…)
     }
 
     void CheckIfEnemiesInRange()
@@ -102,13 +124,13 @@ public class Tower : MonoBehaviour
         {
             Enemy e = allEnemies[i];
             //if e.flying and we are a diamond tower, OR !e.flying and we are an amethyst tower, continue;
-            float dist = Vector3.distance(transform.position, e.transform.position);
+            float dist = Vector3.Distance(transform.position, e.transform.position);
             if (enemiesInRange.Contains(e))
             {
                 if (dist > range)
                 {
                     // enemy exited range – remove it from list
-                    enemiesInRange.remove(e);
+                    enemiesInRange.Remove(e);
                 }
             }
             else
@@ -116,7 +138,7 @@ public class Tower : MonoBehaviour
                 if (dist <= range)
                 {
                     // enemy has entered our range – add it in
-                    enemiesInRange.add(e);
+                    enemiesInRange.Add(e);
                 }
             }
         }
@@ -124,21 +146,21 @@ public class Tower : MonoBehaviour
 
     void onmousenter()
     {
-        if (towerstate != 2)
+        if (towerState != 2)
         {
-            invoke OnMouseEnter with a string describing this gem’s stats
-            (so that they get displayed in the hover box)
+            //invoke OnMouseEnter with a string describing this gem’s stats
+            //(so that they get displayed in the hover box)
     
     }
     }
 
     void onmouseexit()
     {
-        if (towerstate != 2)
+        if (towerState != 2)
         {
-            invoke OnMouseExit(so that hover box gets dismissed)
+            // OnMouseExit(so that hover box gets dismissed)
     
-    }
+        }
     }
 
 }
