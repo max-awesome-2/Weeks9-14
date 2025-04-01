@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
@@ -13,14 +14,19 @@ public class GameManager : MonoBehaviour
     // round tracking
     int roundNumber = 1;
 
-    // player stats
+    // player stats & upgrade tracking
     int gold = 0;
     int round = 1;
+    int upgradeGold = 20;
+    int upgradeLevel = 1;
+
 
     // grid stuff
+    // in the int grid - 0 = empty space, 1 = path, 2 = flagstone, 3+ = waypoints
     int[][] grid;
-    int gridsize = 48;
-    public GameObject tilePrefabGround, tilePrefabPath, tilePrefabFlagstone, towerPrefab;
+    int gridSize = 24;
+    public GameObject tilePrefab, towerPrefab;
+    public Sprite grassSprite, pathSprite, flagstoneSprite;
 
     // ui items
     public GameObject placeGemsButton;
@@ -47,14 +53,50 @@ public class GameManager : MonoBehaviour
     // time
     private bool paused = false;
     private float gameTimeScale = 1;
+    bool fastForwarding = false;
+
+    // upgrades
+    private float[] tierChances = new float[] {100, 0, 0, 0, 0};
+    private float[][] tierChanceUpgradeLevels;
+
+    // tiles
+    public Vector3 topLeftTileCorner;
+    public float tileSize;
+ 
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
         pathfinder = GetComponent<Pathfinding>();
 
+        // initialize upgrade level chances
+        tierChanceUpgradeLevels = new float[][]
+        {
+            new float[]
+            {
+                100, 0, 0, 0, 0
+            },
+            new float[]
+            {
+                50, 50, 0, 0, 0
+            },
+            new float[]
+            {
+                20, 50, 30, 0, 0
+            },
+            new float[]
+            {
+                0, 30, 40, 30, 0
+            },
+            new float[]
+            {
+                0, 0, 0, 50, 50
+            }
+
+        };
+
         //initialize grid with map shape
-        grid = new int[gridsize][];
+        grid = new int[gridSize][];
 
         grid[0] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[1] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -83,16 +125,74 @@ public class GameManager : MonoBehaviour
 
         // loop through grid and spawn tiles at each grid location
 
+        int[][] newGrid = new int[gridSize * 2][];
+
+        // gets the list of top-left waypoint coordinates in the gridsize * 2 system
+        List<int[]> waypointCoords = new List<int[]>();
+
         // use for loops to expand each cell into a 2x2 square, doubling grid size(towers take up a 2x2 square, but this allows them to be placed at offsets of 0.5 spaces)
+        // also scan through grid and add all waypoint coordinates(in order) to waypointCoords
+        for (int x = 0; x < gridSize; x++)
+        {
+            Vector3 rowPos = topLeftTileCorner + Vector3.down * x * tileSize;
+
+            newGrid[x * 2] = new int[gridSize * 2];
+            newGrid[x * 2 + 1] = new int[gridSize * 2];
 
 
-        // scan through grid and add all waypoint coordinates(in order) to waypointCoords
+            for (int y = 0; y < gridSize; y++)
+            {
+                int cornerVal = grid[x][y];
+                int val = cornerVal;
 
+                Sprite tileSprite;
+                if (cornerVal >= 2) tileSprite = flagstoneSprite;
+                else if (cornerVal == 0) tileSprite = grassSprite;
+                else tileSprite = pathSprite;
+
+                // instantiate tile and set sprite
+                Vector3 gridPos = rowPos + Vector3.right * tileSize * y;
+                GameObject newTile = Instantiate(tilePrefab, gridPos, Quaternion.identity);
+                newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
+                
+
+                if (cornerVal > 2)
+                {
+                    int waypointIndex = cornerVal - 3;
+
+                    // extend waypoint list to the current waypoint if it's not long enough yet to accomodate it
+                    if (waypointCoords.Count < waypointIndex + 1)
+                    {
+                        for (int i = 0; i < waypointIndex + 1 - waypointCoords.Count; i++)
+                        {
+                            // extend it with dummy value
+                            waypointCoords.Add(new int[2]);
+                        }
+                    }
+
+                    // set coords of waypoint in list
+                    waypointCoords[waypointIndex] = new int[] { x, y };
+
+                    val = 2;
+                }
+                
+                // replace waypoints with flagstone except for the topleft corner
+
+                newGrid[x * 2][y * 2] = cornerVal;
+                newGrid[x * 2 + 1][y * 2] = val;
+
+                newGrid[x * 2][y * 2 + 1] = val;
+                newGrid[x * 2 + 1][y * 2 + 1] = val;
+            }
+        }
+
+
+        pathfinder.waypoints = waypointCoords;
 
 
     }
 
-    public void onenemykilled()
+    public void OnEnemyKilled()
     {
         //gold += (gold etc.)
         gold += 1;
@@ -120,6 +220,7 @@ public class GameManager : MonoBehaviour
         else
         {
             //use pathfinder to generate enemy path based on grid and waypointCoords
+            List<Vector3> path = pathfinder.GetPath(grid);
 
             //if roundNumber % 5 == 0, it’s a flying enemy round – communicate this via bool parameter in the path generation function call
             bool flyingRound = roundNumber % 5 == 0;
@@ -159,7 +260,7 @@ public class GameManager : MonoBehaviour
         // initialize the gem with its stats
     }
 
-    void update()
+    void Update()
     {
         if (gameState == 0 && placingGems && placedTowers.Count == 5)
         {
@@ -171,7 +272,6 @@ public class GameManager : MonoBehaviour
 
 
                 // if it matches one, call OnKeepTower(index of the tower)
-
 
 
             }
@@ -194,8 +294,9 @@ public class GameManager : MonoBehaviour
 
             if (i != keptIndex)
             {
-
-            } else
+                //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
+            }
+            else
             {
 
             }
@@ -228,7 +329,7 @@ public class GameManager : MonoBehaviour
     public void OnHoverObjectOfInterest(string hoverInfo)
     {
         hoverBox.SetActive(true);
-        hoverBoxText.text = hoverInfo
+        hoverBoxText.text = hoverInfo;
     }
 
     public void OnMouseExitObjectOfInterest()
@@ -239,17 +340,18 @@ public class GameManager : MonoBehaviour
     public void OnPauseButtonPressed()
     {
         paused = !paused;
-        gameTimeScale = paused ? 0 : (fastforwarding ? 3 : 1);
+        gameTimeScale = paused ? 0 : (fastForwarding ? 3 : 1);
     }
 
     public void UpgradeButtonPressed()
     {
-        if (gold < upgradegold) return;
-        gold -= upgradegold;
-        upgradelevel++;
+        if (gold < upgradeGold) return;
+        gold -= upgradeGold;
+        upgradeLevel++;
+
         for (int i = 0; i < 5; i++)
         {
-            tierchances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
+            tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
         }
     }
 
