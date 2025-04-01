@@ -7,7 +7,10 @@ public class Pathfinding : MonoBehaviour
 {
     // returns a series of Vector3 grid points if a path exists
     // otherwise, returns an empty list
-    public List<Vector3> GetPath(int[][] grid)
+
+    public List<int[]> waypoints;
+
+    public List<Vector3> GetPath(int[][] grid, bool isFlyingRound)
     {
         // A* PATHFINDING
         // declare output path

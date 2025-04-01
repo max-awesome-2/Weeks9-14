@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
 
     // tower placement
     List<Tower> placedTowers;
+    public GameObject gemPlacementGraphic;
 
     // sfx
     AudioSource audioSource;
@@ -49,6 +50,17 @@ public class GameManager : MonoBehaviour
     // tower sprite stuff
     public Sprite[] gemTierSprites;
     public Color[] gemTypeColors;
+    // let's say 0 is emerald, 1 is sapphire, 2 is amethyst, 3 is diamond, 4 is topaz, 5 is aquamarine, 6 is opal
+
+    // tower stats
+    public float[] gemTypeBaseDamage;
+    public float[] gemTypeBaseRange;
+    public float[] gemTypeBaseAtkSpeed;
+    public float basePoisonDPS = 5;
+    public float poisonSlowMultiplier = 0.7f;
+    public float freezeSlowMultiplier = 0.6f;
+    public float poisonTime = 4, freezeTime = 4;
+
 
     // time
     private bool paused = false;
@@ -56,16 +68,26 @@ public class GameManager : MonoBehaviour
     bool fastForwarding = false;
 
     // upgrades
-    private float[] tierChances = new float[] {100, 0, 0, 0, 0};
+    private float[] tierChances = new float[] { 100, 0, 0, 0, 0 };
     private float[][] tierChanceUpgradeLevels;
 
     // tiles
     public Vector3 topLeftTileCorner;
     public float tileSize;
- 
+    private Vector3 tileHoverMinBounds, tileHoverMaxBounds;
+    private float oneTileScreenSize; // size of 1 2x tile in screen units
+
 
     void Start()
     {
+        tileHoverMinBounds = topLeftTileCorner - (Vector3.right * tileSize / 2 - Vector3.up * gridSize * tileSize) - (Vector3.up * tileSize / 2);
+        tileHoverMaxBounds = topLeftTileCorner + (Vector3.up * tileSize / 2 + Vector3.right * gridSize * tileSize) + (Vector3.right * tileSize / 2);
+        tileHoverMinBounds = Camera.main.WorldToScreenPoint(tileHoverMinBounds);
+        tileHoverMaxBounds = Camera.main.WorldToScreenPoint(tileHoverMaxBounds);
+        oneTileScreenSize = (tileHoverMaxBounds.x - tileHoverMinBounds.x) / (gridSize * 2);
+
+        print("one tile screen size: " + oneTileScreenSize);
+
         audioSource = GetComponent<AudioSource>();
         pathfinder = GetComponent<Pathfinding>();
 
@@ -154,7 +176,7 @@ public class GameManager : MonoBehaviour
                 Vector3 gridPos = rowPos + Vector3.right * tileSize * y;
                 GameObject newTile = Instantiate(tilePrefab, gridPos, Quaternion.identity);
                 newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
-                
+
 
                 if (cornerVal > 2)
                 {
@@ -175,7 +197,7 @@ public class GameManager : MonoBehaviour
 
                     val = 2;
                 }
-                
+
                 // replace waypoints with flagstone except for the topleft corner
 
                 newGrid[x * 2][y * 2] = cornerVal;
@@ -195,7 +217,7 @@ public class GameManager : MonoBehaviour
     public void OnEnemyKilled()
     {
         //gold += (gold etc.)
-        gold += 1;
+        gold += 3 + Mathf.FloorToInt(round * 1.5f);
         audioSource.PlayOneShot(enemyDeathClip);
     }
 
@@ -216,44 +238,165 @@ public class GameManager : MonoBehaviour
             placedTowers.Clear();
 
 
-    }
+        }
         else
         {
-            //use pathfinder to generate enemy path based on grid and waypointCoords
-            List<Vector3> path = pathfinder.GetPath(grid);
-
             //if roundNumber % 5 == 0, it’s a flying enemy round – communicate this via bool parameter in the path generation function call
             bool flyingRound = roundNumber % 5 == 0;
 
+            //use pathfinder to generate enemy path based on grid and waypointCoords
+            List<Vector3> path = pathfinder.GetPath(grid, flyingRound);
+
+
         }
+    }
+
+    private Vector3 Grid2xToPhysicalPos(int x, int y)
+    {
+        return topLeftTileCorner + Vector3.right * x * tileSize - Vector3.up * y * tileSize;
+    }
+
+    private int[] GetGridAtMousePos()
+    {
+        int[] returnCoords = new int[] { -1, -1 };
+
+        Vector2 mouseGridCoords = Input.mousePosition - tileHoverMinBounds;
+
+        returnCoords[0] = Mathf.FloorToInt(mouseGridCoords.x / oneTileScreenSize);
+        returnCoords[1] = 1 - Mathf.CeilToInt(mouseGridCoords.y / oneTileScreenSize);
+
+        if (returnCoords[0] < 0 || returnCoords[0] >= gridSize * 2 || returnCoords[1] < 0 || returnCoords[1] >= gridSize * 2) return null;
+
+        return returnCoords;
     }
 
     private void PlaceTower()
     {
         //use getgridatmouse() to get the grid the mouse is hovering over
+        // (this is the top left corner of where the tower will be placed, so make sure to check the other three squares to make sure we can put the tower here)
+        int[] grCoords = GetGridAtMousePos();
 
+        if (grCoords == null)
+        {
+            print("invalid coords - off grid");
+            return;
+        }
+
+        // create modified grid
+        int[][] modifiedGrid = new int[gridSize * 2][];
+
+        for (int x = 0; x < gridSize * 2; x++)
+        {
+            for (int y = 0; y < gridSize * 2; y++)
+            {
+
+            }
+        }
+
+        // check for invalid coordinates, i.e. flagstone or other towers
+        // also set the modified (hypothetical) grid's values for where the new tower will be placed to impassable tiles
+        // the hypothetical grid will then be used to check if the path is blocked by the new tower
+        for (int x = grCoords[0]; x < grCoords[0] + 2; x++)
+        {
+            for (int y = grCoords[1]; y < grCoords[1] + 2; y++)
+            {
+                if (x < 0 || y < 0 || x >= gridSize || y >= gridSize)
+                {
+                    print("invalid coords - goes off screen");
+                    return;
+                }
+
+                int valAtCoords = grid[x][y];
+                if (valAtCoords >= 2)
+                {
+                    print("invalid coords - placed on flagstone");
+                }
+                else if (valAtCoords == -1)
+                {
+                    print("invalid coords - placed on other tower");
+                }
+
+                // set hypothetical grid value
+                modifiedGrid[x][y] = -1;
+            }
+        }
 
         //check grid to see if it is a valid location for placement
         //first, check if it’s blocked by another tower or flagstone
         //then, if it’s not, use Pathfinder to attempt to generate a path between all waypoints
+
+        List<Vector3> pathPoints = pathfinder.GetPath(modifiedGrid);
+
+        if (pathPoints.Count == 0)
+        {
+            print("invalid coords: blocks enemies!");
+            return;
+        }
 
 
         //if placement is not valid, spawn an instance of FloatingText at the mouse
 
 
         //if it’s blocked by another tower or the player tried to place on flagstone, set the floatingtext’s text to ‘cannot place here!’
-		//if the placement would block the enemy’s path, change the text to ‘must leave path for enemies!’
+        //if the placement would block the enemy’s path, change the text to ‘must leave path for enemies!’
 
-        //if placement is valid, instantiate tower from prefab
+        //instantiate tower from prefab
+        GameObject newTower = Instantiate(towerPrefab);
+
         //add instantiated tower’s Tower script to placedTowers
-        //block off the new tower’s grid positions in grid
-        //get a randomly generated type and tier to assign to the new gem
+        Tower t = newTower.GetComponent<Tower>();
+        placedTowers.Add(t);
 
+        //block off the new tower’s grid positions in grid
+        for (int x = grCoords[0]; x < grCoords[0] + 2; x++)
+        {
+            for (int y = grCoords[1]; y < grCoords[1] + 2; y++)
+            {
+                grid[x][y] = -1;
+            }
+        }
+
+        //get a randomly generated type and tier to assign to the new gem
+        int gemType = Random.Range(0, gemTypeColors.Length);
+        float gemTierVal = Random.value * 100f;
+
+        float chanceTotal = 0;
+        int gemTier = -1;
+        // to get gem tier:
+        for (int i = 0; i < tierChances.Length; i++)
+        {
+            chanceTotal += tierChances[i];
+
+            if (gemTierVal <= chanceTotal)
+            {
+                gemTier = i;
+                break;
+            }
+        }
+
+        // get stats from stat formula
+        float dmg = 1;
+        float range = 1;
+        float atkSpeed = 1;
+
+        t.InitTower(grCoords[0], grCoords[1], gemType, 1, 1, 1);
+
+        if (gemType == 0)
+        {
+            t.SetPoisonStats(basePoisonDPS, poisonTime, poisonSlowMultiplier);
+        }
+        else if (gemType == 1)
+        {
+            t.SetFreezeStats(freezeSlowMultiplier, freezeTime);
+        }
 
         //use getcomponent to get new tower’s spriterenderer
-
+        SpriteRenderer towerRen = newTower.GetComponent<SpriteRenderer>();
 
         // set the spriterenderer’s sprite and color according to the tier and color of the gem
+        towerRen.color = gemTypeColors[gemType];
+        towerRen.sprite = gemTierSprites[gemTier];
+
         // calculate the gem’s stats based on its type and tier
 
 
@@ -269,12 +412,20 @@ public class GameManager : MonoBehaviour
             {
                 //get grid position at mouse
                 //loop through placedTowers and check if the grid position matches any of their grid positions
+                foreach (Tower t in placedTowers)
+                {
 
+                }
 
                 // if it matches one, call OnKeepTower(index of the tower)
 
 
             }
+
+            // move the tower placement graphic to the mouse pos
+            int[] coords = GetGridAtMousePos();
+            if (coords != null)
+                gemPlacementGraphic.transform.position = Grid2xToPhysicalPos(coords[0], coords[1]);
         }
 
         if (hoverBox.activeSelf)
@@ -286,8 +437,8 @@ public class GameManager : MonoBehaviour
 
     void OnKeepTower(int keptIndex)
     {
-        
-           //     for towers in placedTowers:
+
+        //     for towers in placedTowers:
         for (int i = 0; i < placedTowers.Count; i++)
         {
             Tower t = placedTowers[i];

@@ -30,10 +30,20 @@ public class Tower : MonoBehaviour
     float range;
     float attackSpeed;
 
+    // special stats
+    float opalBonus;
+    float poisonDamage;
+    float poisonTime;
+    float poisonSlow;
+    float freezeSlow;
+    float freezeTime;
+
     // prefabs
     public GameObject projectilePrefab;
 
     // events
+    public UnityEvent<string, GameObject> onMouseEnter;
+    public UnityEvent onMouseExit;
 
     public void InitTower(int xPos, int yPos, int type, float dmg, float range, float atkspd)
     {
@@ -144,17 +154,17 @@ public class Tower : MonoBehaviour
         }
     }
 
-    void onmousenter()
+    void OnMouseEnter()
     {
         if (towerState != 2)
         {
             //invoke OnMouseEnter with a string describing this gem’s stats
             //(so that they get displayed in the hover box)
     
-    }
+        }
     }
 
-    void onmouseexit()
+    void OnMouseExit()
     {
         if (towerState != 2)
         {
@@ -163,4 +173,16 @@ public class Tower : MonoBehaviour
         }
     }
 
+    public void SetPoisonStats(float poisonDmg, float poisonTime, float poisonSlow)
+    {
+        this.poisonDamage = poisonDmg;
+        this.poisonTime = poisonTime;
+        this.poisonSlow = poisonSlow;
+    }
+
+    public void SetFreezeStats(float freezeSlow, float freezeTime)
+    {
+        this.freezeSlow = freezeSlow;
+        this.freezeTime = freezeTime;
+    }
 }
