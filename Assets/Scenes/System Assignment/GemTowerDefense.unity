@@ -232,7 +232,7 @@ MonoBehaviour:
   opalASRatioIncPerTier: 0.1
   baseEnemyHealth: 20
   enemyCount: 20
-  topLeftTileCorner: {x: 0, y: 0, z: 0}
+  topLeftTileCorner: {x: -3, y: 3, z: 0}
   tileSize: 0.25
   statScalingExponentialHeight: 6.5
   enemyToTowerScalingRatio: 1.1
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9af7fa89c550724785649bfd9820d8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 0}
+  gameManager: {fileID: 110187104}
 --- !u!1 &113013983
 GameObject:
   m_ObjectHideFlags: 0

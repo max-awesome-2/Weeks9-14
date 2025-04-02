@@ -104,8 +104,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        tileHoverMinBounds = topLeftTileCorner - (Vector3.right * tileSize / 2 - Vector3.up * gridSize * tileSize) - (Vector3.up * tileSize / 2);
-        tileHoverMaxBounds = topLeftTileCorner + (Vector3.up * tileSize / 2 + Vector3.right * gridSize * tileSize) + (Vector3.right * tileSize / 2);
+        tileHoverMinBounds = Grid2xToPhysicalPos(0, 0) - Vector3.right * tileSize / 4 - Vector3.up * tileSize / 4;
+        tileHoverMaxBounds = Grid2xToPhysicalPos(gridSize * 2 - 1, gridSize * 2 - 1) + Vector3.right * tileSize / 4 + Vector3.up * tileSize / 4;
         tileHoverMinBounds = Camera.main.WorldToScreenPoint(tileHoverMinBounds);
         tileHoverMaxBounds = Camera.main.WorldToScreenPoint(tileHoverMaxBounds);
         oneTileScreenSize = (tileHoverMaxBounds.x - tileHoverMinBounds.x) / (gridSize * 2);
@@ -170,24 +170,24 @@ public class GameManager : MonoBehaviour
         //grid[23] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         grid[0] = new int[]   { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[1] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[2] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[3] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[4] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[5] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[6] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[7] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[8] = new int[]   { 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[9] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[10] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[11] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[12] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[13] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[14] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[15] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[16] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[17] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        grid[18] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[1] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[2] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[3] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[4] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[5] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[6] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[7] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[8] = new int[]   { 0, 0, 0, 0, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[9] = new int[]   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[10] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[11] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[12] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[13] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[14] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 1, 1, 1, 1, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[15] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[16] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[17] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[18] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[19] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[20] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[21] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -217,16 +217,31 @@ public class GameManager : MonoBehaviour
                 int val = cornerVal;
 
                 Sprite tileSprite;
-                if (cornerVal >= 2) tileSprite = flagstoneSprite;
-                else if (cornerVal == 0) tileSprite = grassSprite;
-                else tileSprite = pathSprite;
+
+                Color tileColor;
+
+                if (cornerVal >= 2)
+                {
+                    tileSprite = flagstoneSprite;
+                    tileColor = Color.black;
+                }
+                else if (cornerVal == 0)
+                {
+                    tileSprite = grassSprite;
+                    tileColor = Color.green;
+                }
+                else
+                {
+                    tileSprite = pathSprite;
+                    tileColor = Color.gray;
+                }
 
                 // instantiate tile and set sprite
                 Vector3 gridPos = rowPos + Vector3.right * tileSize * y;
                 GameObject newTile = Instantiate(tilePrefab, gridPos, Quaternion.identity);
                 newTile.transform.localScale = Vector3.one * tileSize;
                 //newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
-                newTile.GetComponent<SpriteRenderer>().color = Random.ColorHSV(); // REMOVE THIS
+                newTile.GetComponent<SpriteRenderer>().color = tileColor; // REMOVE THIS
 
 
                 if (cornerVal > 2)
@@ -263,8 +278,6 @@ public class GameManager : MonoBehaviour
         // overwrite the original grid with the expanded grid
         grid = newGrid;
 
-
-        pathfinder.gameManager = this;
         pathfinder.waypoints = waypointCoords;
 
         pathfindingPath = pathfinder.GetPath(grid, false);
@@ -310,19 +323,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public Vector3 Grid2xToPhysicalPos(int x, int y)
+    public Vector3 GridToPhysicalPos(int x, int y)
     {
         return topLeftTileCorner + Vector3.right * x * tileSize / 2 - Vector3.up * y * tileSize / 2;
+    }
+
+    public Vector3 Grid2xToPhysicalPos(int x, int y)
+    {
+        return topLeftTileCorner + Vector3.right * (x * tileSize / 2 - tileSize/4) - Vector3.up * (y * tileSize / 2 - tileSize / 4);
     }
 
     private int[] GetGridAtMousePos()
     {
         int[] returnCoords = new int[] { -1, -1 };
 
-        Vector2 mouseGridCoords = Input.mousePosition - tileHoverMinBounds;
+        Vector3 mouseGridCoords = Input.mousePosition;
+
+        mouseGridCoords = mouseGridCoords - new Vector3(tileHoverMinBounds.x, tileHoverMaxBounds.y, 0);
 
         returnCoords[0] = Mathf.FloorToInt(mouseGridCoords.x / oneTileScreenSize);
-        returnCoords[1] = 1 - Mathf.CeilToInt(mouseGridCoords.y / oneTileScreenSize);
+        returnCoords[1] = gridSize * 2 - 1 - Mathf.CeilToInt(mouseGridCoords.y / oneTileScreenSize);
 
         if (returnCoords[0] < 0 || returnCoords[0] >= gridSize * 2 || returnCoords[1] < 0 || returnCoords[1] >= gridSize * 2) return null;
 
@@ -441,6 +461,12 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            int[] smda = GetGridAtMousePos();
+            if (smda != null) print("grid at mouse: " + smda[0] + ", " + smda[1]);
+        }
+
         if (gameState == 0 && placingGems && placedTowers.Count == 5)
         {
 
@@ -667,5 +693,11 @@ public class GameManager : MonoBehaviour
                 last = next;
             }
         }
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMinBounds), 0.05f);
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMaxBounds), 0.05f);
+
     }
 }

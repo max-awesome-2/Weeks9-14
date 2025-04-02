@@ -38,7 +38,7 @@ public class Pathfinding : MonoBehaviour
             {
                 // in the grid 
                 int n = grid[x][y];
-                nodeGrid[x][y] = new Node(gameManager.Grid2xToPhysicalPos(x, y), x, y, n != -1);
+                nodeGrid[x][y] = new Node(gameManager.Grid2xToPhysicalPos(y, x), x, y, n != -1);
 
                 if (n > 2)
                 {
