@@ -8,7 +8,7 @@ public class Node
     // class representing an A* pathfinding node
     public bool isPassable = false;
     public float f, g, h;
-    private Node parent;
+    public Node parent;
 
     public Vector3 pos;
     public int gridX, gridY;

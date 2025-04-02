@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime;
@@ -224,7 +225,7 @@ public class GameManager : MonoBehaviour
                 Vector3 gridPos = rowPos + Vector3.right * tileSize * y;
                 GameObject newTile = Instantiate(tilePrefab, gridPos, Quaternion.identity);
                 newTile.transform.localScale = Vector3.one * tileSize;
-                newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
+                //newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
                 newTile.GetComponent<SpriteRenderer>().color = Random.ColorHSV(); // REMOVE THIS
 
 
@@ -235,15 +236,16 @@ public class GameManager : MonoBehaviour
                     // extend waypoint list to the current waypoint if it's not long enough yet to accomodate it
                     if (waypointCoords.Count < waypointIndex + 1)
                     {
-                        for (int i = 0; i < waypointIndex + 1 - waypointCoords.Count; i++)
+                        int increaseBy = waypointIndex + 1 - waypointCoords.Count;
+                        for (int i = 0; i < increaseBy; i++)
                         {
                             // extend it with dummy value
-                            waypointCoords.Add(new int[2]);
+                            waypointCoords.Add(null);
                         }
                     }
 
                     // set coords of waypoint in list
-                    waypointCoords[waypointIndex] = new int[] { x, y };
+                    waypointCoords[waypointIndex] = new int[] { x * 2, y * 2 };
 
                     val = 2;
                 }
@@ -257,6 +259,9 @@ public class GameManager : MonoBehaviour
                 newGrid[x * 2 + 1][y * 2 + 1] = val;
             }
         }
+
+        // overwrite the original grid with the expanded grid
+        grid = newGrid;
 
 
         pathfinder.gameManager = this;
@@ -307,7 +312,7 @@ public class GameManager : MonoBehaviour
 
     public Vector3 Grid2xToPhysicalPos(int x, int y)
     {
-        return topLeftTileCorner + Vector3.right * x * tileSize - Vector3.up * y * tileSize;
+        return topLeftTileCorner + Vector3.right * x * tileSize / 2 - Vector3.up * y * tileSize / 2;
     }
 
     private int[] GetGridAtMousePos()

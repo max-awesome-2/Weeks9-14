@@ -56,9 +56,11 @@ public class Pathfinding : MonoBehaviour
             }
         }
 
-        List<Node> nodePath = new List<Node>(), openList = new List<Node>(), closedList = new List<Node>();
-        Node target, currentNode;
+        List<Node> openList = new List<Node>(), closedList = new List<Node>();
+        Node target = null, currentNode = null;
+
         //add first waypoint node location to output vector3 list
+        outputPath.Add(waypointNodes[0].pos);
 
 
         //	// pseudocode here based on https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
@@ -68,8 +70,17 @@ public class Pathfinding : MonoBehaviour
             Node startNode = waypointNodes[wpNodeIndex];
             Node nextNode = waypointNodes[wpNodeIndex + 1];
 
-            //		clear nodepath, openlist
-            nodePath.Clear();
+            // reset all nodes
+            for (int x = 0; x < gridSize2x; x++)
+            {
+                for (int y = 0; y < gridSize2x; y++)
+                {
+                    nodeGrid[x][y].Reset();
+                }
+            }
+
+            //		clear closedlist, openlist
+            closedList.Clear();
             openList.Clear();
 
             //		add waypoint node to open list
@@ -82,8 +93,6 @@ public class Pathfinding : MonoBehaviour
 
             while (!pathFound)
             {
-                //	clear closed list
-                closedList.Clear();
 
                 //	if open list is empty, no path exists – raise flag and break
                 if (openList.Count == 0)
@@ -123,7 +132,7 @@ public class Pathfinding : MonoBehaviour
                 {
                     for (int y = currentNode.gridY - 1; y <= currentNode.gridY + 1; y++)
                     {
-                        if (x < 0 || x >= gridSize2x || y < 0 || y >= gridSize2x)
+                        if (x < 0 || x >= gridSize2x || y < 0 || y >= gridSize2x || (x == currentNode.gridX && y == currentNode.gridY))
                         {
                             continue;
                         }
@@ -159,13 +168,38 @@ public class Pathfinding : MonoBehaviour
 
             //		if path does not exist flag is true, return null
             if (!pathFound) return null;
+
+            // at this point, currentNode EQUALS the target node - we want to add all positions leading up to the target node, including the target's pos, but NOT including the very first node's pos
+            List<Vector3> posList = new List<Vector3>(); // list that values will be inserted backwards into
+
+            while (true)
+            {
+                if (currentNode.parent == null)
+                {
+                    break;
+                } else
+                {
+
+                    posList.Insert(0, currentNode.pos);
+
+                    currentNode = currentNode.parent;
+                }
+
+            }
+
+            // add the subpath's positions to the full output path
+            foreach (Vector3 v in posList)
+            {
+                outputPath.Add(v);
+            }
+
         }
 
 
-        //		construct path list by going backwards from waypoint node and recursively adding parents to the list
-        //		for each node in the list EXCEPT THE FIRST, add its Vector3 position to the output Vector3 list;
-        //return the output vector3 list
 
+
+
+        //return the output vector3 list
         return outputPath;
 
     }
