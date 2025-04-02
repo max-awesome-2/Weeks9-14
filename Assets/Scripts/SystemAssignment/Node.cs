@@ -10,12 +10,16 @@ public class Node
     public float f, g, h;
     public Node parent;
 
-    public Vector2 pos;
+    public Vector3 pos;
+    public int gridX, gridY;
 
-    public Node(int x, int y, bool passable)
+    public Node(Vector3 worldPos, int x, int y, bool passable)
     {
         isPassable = passable;
-        pos = new Vector2(x, y);
+        pos = worldPos;
+
+        gridX = x;
+        gridY = y;
     }
 
     public void UpdateValues(Node targetNode)

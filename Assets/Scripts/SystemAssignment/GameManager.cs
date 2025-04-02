@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,14 +13,13 @@ public class GameManager : MonoBehaviour
     private bool placingGems = false;
 
     // round tracking
+    public int finalRound = 20;
     int roundNumber = 1;
 
     // player stats & upgrade tracking
     int gold = 0;
-    int round = 1;
     int upgradeGold = 20;
     int upgradeLevel = 1;
-
 
     // grid stuff
     // in the int grid - 0 = empty space, 1 = path, 2 = flagstone, 3+ = waypoints
@@ -36,7 +36,9 @@ public class GameManager : MonoBehaviour
     List<int[]> waypointCoords;
 
     // tower placement
-    List<Tower> placedTowers;
+    // we need a list to keep towers that have been placed this placement phase,
+    // then another list to hold all kept towers - this is necessary in order to figure out opal buffs
+    List<Tower> placedTowers, keptTowers;
     public GameObject gemPlacementGraphic;
 
     // sfx
@@ -49,10 +51,12 @@ public class GameManager : MonoBehaviour
 
     // tower sprite stuff
     public Sprite[] gemTierSprites;
+    public Sprite rockSprite;
     public Color[] gemTypeColors;
-    // let's say 0 is emerald, 1 is sapphire, 2 is amethyst, 3 is diamond, 4 is topaz, 5 is aquamarine, 6 is opal
+    // let's say 0 is emerald, 1 is sapphire, 2 is amethyst, 3 is diamond, 4 is topaz, 5 is aquamarine, 6 is opal, 7 is ruby
 
     // tower stats
+    public float baseTowerDamage = 5;
     public float[] gemTypeBaseDamage;
     public float[] gemTypeBaseRange;
     public float[] gemTypeBaseAtkSpeed;
@@ -61,6 +65,13 @@ public class GameManager : MonoBehaviour
     public float freezeSlowMultiplier = 0.6f;
     public float poisonTime = 4, freezeTime = 4;
 
+    public float opalBaseASRatio = 1.15f;
+    public float opalASRatioIncPerTier = 0.1f;
+
+    // enemy stats
+    public float baseEnemyHealth; // base enemy health
+    public int enemyCount = 20;
+    private List<Enemy> enemyList; // contains all spawned enemies
 
     // time
     private bool paused = false;
@@ -76,6 +87,16 @@ public class GameManager : MonoBehaviour
     public float tileSize;
     private Vector3 tileHoverMinBounds, tileHoverMaxBounds;
     private float oneTileScreenSize; // size of 1 2x tile in screen units
+
+    // scaling
+    // the b value in y = a (b/a)^x
+    public float statScalingExponentialHeight = 6.5f;
+
+    // multiplier for how enemy health scales in relation to tower stats - they should scale sliiightly more
+    public float enemyToTowerScalingRatio = 1.1f;
+
+    // unityevents
+    private UnityEvent onRoundStart, onRoundEnd;
 
 
     void Start()
@@ -175,7 +196,9 @@ public class GameManager : MonoBehaviour
                 // instantiate tile and set sprite
                 Vector3 gridPos = rowPos + Vector3.right * tileSize * y;
                 GameObject newTile = Instantiate(tilePrefab, gridPos, Quaternion.identity);
+                newTile.transform.localScale = Vector3.one * tileSize;
                 newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
+                newTile.GetComponent<SpriteRenderer>().color = Random.ColorHSV(); // REMOVE THIS
 
 
                 if (cornerVal > 2)
@@ -209,6 +232,7 @@ public class GameManager : MonoBehaviour
         }
 
 
+        pathfinder.gameManager = this;
         pathfinder.waypoints = waypointCoords;
 
 
@@ -217,7 +241,7 @@ public class GameManager : MonoBehaviour
     public void OnEnemyKilled()
     {
         //gold += (gold etc.)
-        gold += 3 + Mathf.FloorToInt(round * 1.5f);
+        gold += 3 + Mathf.FloorToInt(roundNumber * 1.5f);
         audioSource.PlayOneShot(enemyDeathClip);
     }
 
@@ -251,7 +275,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private Vector3 Grid2xToPhysicalPos(int x, int y)
+    public Vector3 Grid2xToPhysicalPos(int x, int y)
     {
         return topLeftTileCorner + Vector3.right * x * tileSize - Vector3.up * y * tileSize;
     }
@@ -289,7 +313,7 @@ public class GameManager : MonoBehaviour
         {
             for (int y = 0; y < gridSize * 2; y++)
             {
-
+                modifiedGrid[x][y] = grid[x][y];
             }
         }
 
@@ -325,7 +349,7 @@ public class GameManager : MonoBehaviour
         //first, check if it’s blocked by another tower or flagstone
         //then, if it’s not, use Pathfinder to attempt to generate a path between all waypoints
 
-        List<Vector3> pathPoints = pathfinder.GetPath(modifiedGrid);
+        List<Vector3> pathPoints = pathfinder.GetPath(modifiedGrid, false);
 
         if (pathPoints.Count == 0)
         {
@@ -333,9 +357,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-
         //if placement is not valid, spawn an instance of FloatingText at the mouse
-
 
         //if it’s blocked by another tower or the player tried to place on flagstone, set the floatingtext’s text to ‘cannot place here!’
         //if the placement would block the enemy’s path, change the text to ‘must leave path for enemies!’
@@ -374,58 +396,61 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // get stats from stat formula
-        float dmg = 1;
-        float range = 1;
-        float atkSpeed = 1;
+        t.x = grCoords[0];
+        t.y = grCoords[1];
 
-        t.InitTower(grCoords[0], grCoords[1], gemType, 1, 1, 1);
+        // set tower's stats
+        SetTowerStats(t, gemTier, gemType);
 
-        if (gemType == 0)
-        {
-            t.SetPoisonStats(basePoisonDPS, poisonTime, poisonSlowMultiplier);
-        }
-        else if (gemType == 1)
-        {
-            t.SetFreezeStats(freezeSlowMultiplier, freezeTime);
-        }
-
-        //use getcomponent to get new tower’s spriterenderer
-        SpriteRenderer towerRen = newTower.GetComponent<SpriteRenderer>();
-
-        // set the spriterenderer’s sprite and color according to the tier and color of the gem
-        towerRen.color = gemTypeColors[gemType];
-        towerRen.sprite = gemTierSprites[gemTier];
-
-        // calculate the gem’s stats based on its type and tier
-
-
-        // initialize the gem with its stats
     }
 
     void Update()
     {
         if (gameState == 0 && placingGems && placedTowers.Count == 5)
         {
-            // if 
-            if (Input.GetMouseButtonDown(1))
-            {
-                //get grid position at mouse
-                //loop through placedTowers and check if the grid position matches any of their grid positions
-                foreach (Tower t in placedTowers)
-                {
 
+
+            if (placedTowers.Count == 5)
+            {
+                if (Input.GetMouseButtonDown(1))
+                {
+                    int[] coords = GetGridAtMousePos();
+
+                    print("right click during placement");
+                    if (coords != null)
+                    {
+
+                        //loop through placedTowers and check if the grid position matches any of their grid positions
+                        for (int i = 0; i < placedTowers.Count; i++)
+                        {
+                            Tower t = placedTowers[i];
+
+                            // tower's stored grid position is its top left corner, so make sure to check intersection with its other 3 spaces
+                            int gX = t.x, gY = t.y;
+                            if (coords[0] >= gX && coords[0] <= (gX + 1) && coords[1] >= gY && coords[1] <= (gY + 1))
+                            {
+                                // if it matches one, call OnKeepTower(index of the tower)
+                                OnKeepTower(i);
+                                print("KEEPING TOWER AT INDEX " + i);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        // nothing happens
+                    }
                 }
 
-                // if it matches one, call OnKeepTower(index of the tower)
-
+            }
+            else
+            {
+                // move the tower placement graphic to the mouse pos
+                int[] coords = GetGridAtMousePos();
+                if (coords != null)
+                    gemPlacementGraphic.transform.position = Grid2xToPhysicalPos(coords[0], coords[1]);
 
             }
-
-            // move the tower placement graphic to the mouse pos
-            int[] coords = GetGridAtMousePos();
-            if (coords != null)
-                gemPlacementGraphic.transform.position = Grid2xToPhysicalPos(coords[0], coords[1]);
         }
 
         if (hoverBox.activeSelf)
@@ -433,6 +458,47 @@ public class GameManager : MonoBehaviour
             //set hoverbox position to mouse position
             hoverBox.transform.position = Input.mousePosition;
         }
+    }
+
+    /// <summary>
+    /// Sets a tower's stats based on its gem type and tier. Called once when a tower is initially generated, and again if it is combine upgraded when kept.
+    /// </summary>
+    private void SetTowerStats(Tower t, int gemTier, int gemType)
+    {
+        // calculate the gem’s stats based on its type and tier
+        float dmg = baseTowerDamage * gemTypeBaseDamage[gemType];
+        float range = 1 * gemTypeBaseRange[gemType];
+        float atkSpeed = 1 * gemTypeBaseAtkSpeed[gemType];
+
+        float tierRatio = GetTierStatRatio(gemTier);
+        dmg *= tierRatio;
+        // TO CONSIDER: make range and attack speed scale linearly
+
+        //range *= tierRatio; 
+        //atkSpeed *= tierRatio;
+
+        // initialize the gem with its stats
+        t.InitTower(gemType, gemTier, dmg, range, atkSpeed);
+
+        if (gemType == 0)
+        {
+            t.SetPoisonStats(basePoisonDPS * tierRatio, poisonTime, poisonSlowMultiplier);
+        }
+        else if (gemType == 1)
+        {
+            t.SetFreezeStats(freezeSlowMultiplier, freezeTime);
+        }
+        else if (gemType == 6)
+        {
+            t.SetOpalStats(opalBaseASRatio + opalASRatioIncPerTier * gemTier);
+        }
+
+        //use getcomponent to get new tower’s spriterenderer
+        SpriteRenderer towerRen = t.GetComponent<SpriteRenderer>();
+
+        // set the spriterenderer’s sprite and color according to the tier and color of the gem
+        towerRen.color = gemTypeColors[gemType];
+        towerRen.sprite = gemTierSprites[gemTier];
     }
 
     void OnKeepTower(int keptIndex)
@@ -446,32 +512,52 @@ public class GameManager : MonoBehaviour
             if (i != keptIndex)
             {
                 //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
+                t.OnNotKept();
+                SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
+                sr.color = Color.white;
+                sr.sprite = rockSprite;
             }
             else
             {
+                bool combineUpgrade = false;
 
+                // first, look through to see if it's combineable
+                for (int j = 0; j < placedTowers.Count; j++)
+                {
+                    Tower t2 = placedTowers[j];
+                    if (j != i && t2.gemType == t.gemType && t2.gemTier == t.gemTier && t.gemTier != gemTierSprites.Length - 1)
+                    {
+                        // COMBINEABLE - upgrade tier of the new one
+                        combineUpgrade = true;
+                        break;
+                    }
+                }
+
+                // if the gem is comineable, upgrade its tier by 1 and reset its stats
+                if (combineUpgrade)
+                    SetTowerStats(t, t.gemTier + 1, t.gemType);
+
+                // initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
+                t.OnKept(onRoundStart, onRoundEnd, enemyList);
+                keptTowers.Add(t);
+
+                // apply opal bonuses from all existing opal towers that this new tower is in range of
+                for (int j = 0; j < keptTowers.Count; j++)
+                {
+                    Tower t2 = keptTowers[j];
+                    if (t2.gemType == 6 && Vector3.Distance(t.transform.position, t2.transform.position) <= t2.range)
+                    {
+                        t.AddOpalRatio(t2.opalBonus);
+                    } 
+
+                    // make sure that, if this new tower is an opal tower, also add our opal bonus to the existing towers that are in range
+                    if (t.gemType == 6 && Vector3.Distance(t.transform.position, t2.transform.position) <= t.range)
+                    {
+                        t2.AddOpalRatio(t.opalBonus);
+                    }
+                }
             }
-            //     if index is not keptIndex:
-            //tower.NotKept()
-
-
-            //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
-
-            //     else:
-            //note the kept tower’s type and tier
-
-
-            //         run through the placedTowers list and see if there are any other gems of the same type and tier
-
-
-            //         if so, combine it with the kept tower, raising the tier of the kept tower by one and changing its sprite to match the new tier, then recalculate its stats
-
-
-            //         initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
         }
-
-
-
 
         ChangePhase(1);
     }
@@ -504,6 +590,29 @@ public class GameManager : MonoBehaviour
         {
             tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
         }
+    }
+
+    private float GetTierStatRatio(int tier)
+    {
+        // calculate x value to evaluate the exponential curve at
+        int maxTier = gemTierSprites.Length;
+        float getPointAtX = (1f / (maxTier - 1)) * tier;
+
+        return GetScaleRatio(statScalingExponentialHeight, getPointAtX);
+    }
+
+    private float GetEnemyStatRatio(int round)
+    {
+        float roundRatio = round * (1f / (finalRound - 1));
+
+        return GetScaleRatio(statScalingExponentialHeight * enemyToTowerScalingRatio, roundRatio);
+    }
+
+    private float GetScaleRatio(float xAtOneIntercept, float evaluationX)
+    {
+        float bonusRatio = 0.1f * Mathf.Pow(xAtOneIntercept / 0.1f, evaluationX);
+
+        return 1 + bonusRatio;
     }
 
 }

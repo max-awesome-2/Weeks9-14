@@ -5,18 +5,22 @@ using UnityEngine;
 
 public class Pathfinding : MonoBehaviour
 {
-    // returns a series of Vector3 grid points if a path exists
-    // otherwise, returns an empty list
+    // reference to gamemanager - set in GameManager
+    public GameManager gameManager;
 
+    // list of waypoint coordinates
     public List<int[]> waypoints;
 
+    // returns a series of Vector3 grid points if a path exists
+    // otherwise, returns an empty list
     public List<Vector3> GetPath(int[][] grid, bool isFlyingRound)
     {
         // A* PATHFINDING
         // declare output path
         List<Vector3> outputPath = new List<Vector3>();
 
-        List<Node> waypointNodes = new List<Node>();
+        Node[] waypointNodes = new Node[waypoints.Count];
+
 
         // convert grid into a 2D array of pathfinding nodes
         Node[][] nodeGrid = new Node[grid.Length][];
@@ -27,15 +31,29 @@ public class Pathfinding : MonoBehaviour
             {
                 // in the grid 
                 int n = grid[x][y];
-                nodeGrid[x][y] = new Node(x, y, n != -1);
+                nodeGrid[x][y] = new Node(gameManager.Grid2xToPhysicalPos(x, y), x, y, n != -1);
+
+                if (n > 2)
+                {
+                    // get the node representing this waypoint and insert it into the waypointnodes array
+                    // these will be used as destination nodes for A*
+                    for (int i = 0; i < waypoints.Count; i++)
+                    {
+                        int[] wCoords = waypoints[i];
+                        if (x == wCoords[0] && y == wCoords[1])
+                        {
+                            waypointNodes[i] = nodeGrid[x][y];
+                        }
+                    }
+                }
             }
 		}
 	
-
-        //^ in this loop, also grab all waypoint nodes and add them to a list
-        //	List<Node> nodePath, openList, closedList = new List<Node>();
-        //Node target, currentNode;
+        List<Node> nodePath, openList, closedList = new List<Node>();
+        Node target, currentNode;
         //add first waypoint node location to output vector3 list
+
+
         //	// pseudocode here based on https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
         //	for each waypoint node (except for the final one):
         //		clear nodepath, openlist

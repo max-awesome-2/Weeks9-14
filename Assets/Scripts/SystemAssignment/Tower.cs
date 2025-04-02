@@ -25,18 +25,22 @@ public class Tower : MonoBehaviour
     private List<Enemy> enemiesInRange = new List<Enemy>();
 
     // stats
-    int gemType;
+    public int gemType;
+    public int gemTier;
     float damage;
-    float range;
+    public float range;
     float attackSpeed;
 
     // special stats
-    float opalBonus;
+    public float opalBonus;
     float poisonDamage;
     float poisonTime;
     float poisonSlow;
     float freezeSlow;
     float freezeTime;
+
+    // keeps track of the total bonus attack speed given to this tower by all opal towers (including itself)
+    private float totalOpalBonusRatio = 1f;
 
     // prefabs
     public GameObject projectilePrefab;
@@ -45,12 +49,11 @@ public class Tower : MonoBehaviour
     public UnityEvent<string, GameObject> onMouseEnter;
     public UnityEvent onMouseExit;
 
-    public void InitTower(int xPos, int yPos, int type, float dmg, float range, float atkspd)
+    public void InitTower(int type, int tier, float dmg, float range, float atkspd)
     {
-        //set xPos, yPos, type, tier, dmg, range, atkspd variables
-        x = xPos;
-        y = yPos;
+        //set type, tier, dmg, range, atkspd variables
         gemType = type;
+        gemTier = tier;
         damage = dmg;
         this.range = range;
         attackSpeed = atkspd;
@@ -184,5 +187,17 @@ public class Tower : MonoBehaviour
     {
         this.freezeSlow = freezeSlow;
         this.freezeTime = freezeTime;
+    }
+
+    public void SetOpalStats(float bonus)
+    {
+        opalBonus = bonus;
+
+    }
+     
+    // adds an attack speed bonus from an opal tower
+    public void AddOpalRatio(float bonus)
+    {
+        totalOpalBonusRatio += bonus - 1;
     }
 }
