@@ -5,35 +5,19 @@ public class Projectile : MonoBehaviour
 {
     public float projectileSpeed = 10f;
     public float hitDistance = 0.05f;
-    public float damage;
     private Enemy target;
     private bool targetSet = false;
-    private int gemType;
 
-    private float slowTime;
-    private float poisonTime;
-    private float poisonDamage;
+    public Tower originTower;
 
-    public void Init(int gemType, float dmg, Enemy target)
+    public void Init(Tower origin, Enemy target)
     {
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
 
         // set spriterenderer’s color based on gemtype
 
         targetSet = true;
-        damage = dmg;
-        this.gemType = gemType;
-    }
-
-    public void SetSlowTime(float slowTime)
-    {
-        this.slowTime = slowTime;
-    }
-
-    public void SetPoison(float poisonDmg, float poisonTime)
-    {
-        poisonDamage = poisonDmg;
-        this.poisonTime = poisonTime;
+        originTower = origin;
     }
 
     void Update()
@@ -44,13 +28,7 @@ public class Projectile : MonoBehaviour
             if (Vector3.Distance(transform.position, target.transform.position) <= hitDistance)
             {
                 // register hit on enemy
-                target.TakeDamage(damage);
-
-                //spawn floating text with damage number above enemy
-
-                //if gemType = sapphire, slow the enemy
-
-                //if gemType = emerald, slow and poison the enemy
+                target.OnHit(this);
 
             }
         }

@@ -74,6 +74,17 @@ public class Enemy : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, targetWaypoint, moveSpeed * Time.deltaTime);
     }
 
+    public void OnHit(Projectile p)
+    {
+        Tower originTower = p.originTower;
+
+        float dmg = originTower.GetDamageInstance();
+
+        // instantiate floating damage text
+
+        TakeDamage(dmg);
+    }
+
     public void TakeDamage(float dmg)
     {
         currentHealth -= dmg;

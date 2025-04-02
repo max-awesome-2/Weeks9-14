@@ -124,10 +124,8 @@ public class Tower : MonoBehaviour
 
         Projectile p = proj.GetComponent<Projectile>();
 
-        p.Init(gemType, damage, target);
+        p.Init(this, target);
 
-        //if (type == sapphire) p.SetSlowTime(…)
-        //else if (type == emerald) p.setpoison(…)
     }
 
     void CheckIfEnemiesInRange()
@@ -199,5 +197,16 @@ public class Tower : MonoBehaviour
     public void AddOpalRatio(float bonus)
     {
         totalOpalBonusRatio += bonus - 1;
+    }
+
+    // returns one specific instance of damage - apply diamond bonus here
+    public float GetDamageInstance()
+    {
+        bool crit = gemType == 3 && Random.value <= 0.25f;
+
+        float returnDamage = damage;
+        if (crit) returnDamage *= 2;
+
+        return returnDamage;
     }
 }
