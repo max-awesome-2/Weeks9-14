@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.Burst.Intrinsics;
 using Unity.VisualScripting;
 using UnityEditor.Timeline.Actions;
@@ -54,6 +55,12 @@ public class Tower : MonoBehaviour
     // ref to gamemanager
     public GameManager gameManager;
 
+    // the range indicator sprite attached to this tower
+    public GameObject rangeIndicator;
+
+    // debug
+    public TextMeshProUGUI tierText;
+
     public void InitTower(int type, int tier, float dmg, float range, float atkspd)
     {
         //set type, tier, dmg, range, atkspd variables
@@ -63,6 +70,13 @@ public class Tower : MonoBehaviour
         this.range = range;
         attackSpeed = atkspd;
 
+        tierText.text = gemTier.ToString();
+
+        // set range indicator size to match tower range
+        Transform prevParent = rangeIndicator.transform.parent;
+        rangeIndicator.transform.parent = null;
+        rangeIndicator.transform.localScale = Vector3.one * range;
+        rangeIndicator.transform.SetParent(prevParent);
     }
 
     public void OnKept(UnityEvent roundStart, UnityEvent roundEnd, List<Enemy> enemyList)
@@ -191,7 +205,10 @@ public class Tower : MonoBehaviour
         {
             //invoke OnMouseEnter with a string describing this gem’s stats
             //(so that they get displayed in the hover box)
-    
+
+            //if (onMouseEnter != null) onMouseEnter.Invoke();
+
+            rangeIndicator.SetActive(true);
         }
     }
 
@@ -200,7 +217,7 @@ public class Tower : MonoBehaviour
         if (towerState != 2)
         {
             // OnMouseExit(so that hover box gets dismissed)
-    
+            rangeIndicator.SetActive(false);
         }
     }
 
