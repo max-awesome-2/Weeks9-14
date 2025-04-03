@@ -23,6 +23,9 @@ public class GameManager : MonoBehaviour
     int upgradeGold = 20;
     int upgradeLevel = 1;
 
+    int maxLives = 25;
+    int currentLives = 25;
+
     // grid stuff
     // in the int grid - 0 = empty space, 1 = path, 2 = flagstone, 3+ = waypoints
     int[][] grid;
@@ -85,6 +88,7 @@ public class GameManager : MonoBehaviour
     // upgrades
     private float[] tierChances = new float[] { 100, 0, 0, 0, 0 };
     private float[][] tierChanceUpgradeLevels;
+    public int[] tierChanceUpgradeCosts;
 
     // tiles
     public Vector3 topLeftTileCorner;
@@ -105,6 +109,9 @@ public class GameManager : MonoBehaviour
     // debug stuff
     private List<Vector3> pathfindingPath;
 
+    // UI text vars
+    public TextMeshProUGUI goldText, livesText, upgradeChancesButtonText;
+
     void Start()
     {
         tileHoverMinBounds = Grid2xToPhysicalPos(0, 0) - Vector3.right * tileSize / 4 - Vector3.up * tileSize / 4;
@@ -117,6 +124,7 @@ public class GameManager : MonoBehaviour
         gemPlacementGraphic.transform.localScale = Vector3.one * tileSize;
         wizardTowerGraphic.transform.localScale = Vector3.one * wizardTowerGraphic.transform.localScale.x * tileSize;
 
+        ResetGame();
 
         audioSource = GetComponent<AudioSource>();
         pathfinder = GetComponent<Pathfinding>();
@@ -148,11 +156,7 @@ public class GameManager : MonoBehaviour
         };
 
         // set initial upgrade chances
-        for (int i = 0; i < 5; i++)
-        {
-            tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
-        }
-
+        UpdateUpgradeChances();
         //initialize grid with map shape
         grid = new int[gridSize][];
 
@@ -305,6 +309,46 @@ public class GameManager : MonoBehaviour
         ChangePhase(0);
     }
 
+    private void ResetGame()
+    {
+        currentLives = maxLives;
+        gold = 0;
+        UpdateLivesText();
+        UpdateGoldText();
+
+        upgradeLevel = 0;
+        UpdateUpgradeChances();
+    }
+
+    private void UpdateLivesText()
+    {
+        livesText.text = "Lives: " + currentLives;
+    }
+
+    private void UpdateGoldText()
+    {
+        goldText.text = "Gold: " + gold;
+    }
+
+    private void UpdateUpgradeChances()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
+        }
+
+        // update next level cost
+        upgradeGold = tierChanceUpgradeCosts[upgradeLevel];
+
+        if (upgradeLevel == tierChanceUpgradeCosts.Length - 1)
+        {
+            upgradeChancesButtonText.text = "Chances Maxed Out!";
+        } else
+        {
+            upgradeChancesButtonText.text = "Upgrade Chances";
+        }
+    }
+
 
     public void OnPlaceGemsButtonClicked()
     {
@@ -386,9 +430,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // when an enemy reaches the tower, subtract lives from the life total and update the UI display
     private void OnEnemyReachedTower()
     {
-        // todo: fill this in
+        currentLives -= 2 + Mathf.FloorToInt(roundNumber / 5);
+
+        currentLives = Mathf.Max(currentLives, 0);
+
+        if (currentLives <= 0)
+        {
+            // TODO: game over screen + game reset
+        }
+
+        UpdateLivesText();
     }
 
     public void OnEnemyKilled()
@@ -752,20 +806,24 @@ public class GameManager : MonoBehaviour
         gameTimeScale = paused ? 0 : (fastForwarding ? 3 : 1);
     }
 
+    public void OnFastForwardButtonPressed()
+    {
+        fastForwarding = !fastForwarding;
+        gameTimeScale = paused ? 0 : (fastForwarding ? 3 : 1);
+    }
+
     public void UpgradeButtonPressed()
     {
-        if (gold < upgradeGold) return;
+        if (gold < upgradeGold || upgradeLevel == tierChanceUpgradeLevels.Length - 1) return;
         
         // do floating text "not enough gold!"
 
         gold -= upgradeGold;
+        UpdateGoldText();
 
         upgradeLevel++;
 
-        for (int i = 0; i < 5; i++)
-        {
-            tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
-        }
+        UpdateUpgradeChances();
     }
 
     private float GetTierStatRatio(int tier)
