@@ -293,7 +293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 719730f54ec6e05468bc21baf8c24e2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.25
+  moveSpeed: 1
   maxHealth: 0
   currentHealth: 0
   flying: 0
@@ -308,9 +308,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   hitSound: {fileID: 0}
-  poisonedColor: {r: 0, g: 1, b: 0, a: 1}
+  poisonedColor: {r: 0, g: 0.6320754, b: 0, a: 1}
   regularColor: {r: 1, g: 0, b: 0, a: 1}
-  frozenColor: {r: 0, g: 0, b: 1, a: 1}
+  frozenColor: {r: 0.50614095, g: 0.50614095, b: 0.8867924, a: 1}
 --- !u!1 &5785891272346115837
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     // round tracking
     public int finalRound = 20;
     int roundNumber = 1;
+    public int flyingRoundEvery = 5;
 
     // player stats & upgrade tracking
     int gold = 0;
@@ -43,8 +44,9 @@ public class GameManager : MonoBehaviour
     // tower placement
     // we need a list to keep towers that have been placed this placement phase,
     // then another list to hold all kept towers - this is necessary in order to figure out opal buffs
-    List<Tower> placedTowers = new List<Tower>(), keptTowers = new List<Tower>();
+    List<Tower> placedTowers = new List<Tower>(), keptTowers = new List<Tower>(), rocks = new List<Tower>();
     public GameObject gemPlacementGraphic;
+    public int maxPlacedTowers = 5;
 
     // sfx
     AudioSource audioSource;
@@ -110,10 +112,19 @@ public class GameManager : MonoBehaviour
     private List<Vector3> pathfindingPath;
 
     // UI text vars
-    public TextMeshProUGUI goldText, livesText, upgradeChancesButtonText;
+    public TextMeshProUGUI goldText, livesText, roundText, upgradeChancesButtonText;
+
+    // game over vars
+    private bool gameStarted = false;
+    private bool gameOver = false;
+    public GameObject startScreen, gameOverScreen, victoryScreen;
+
+    private IEnumerator spawnCoroutine;
 
     void Start()
     {
+        startScreen.SetActive(true);
+
         tileHoverMinBounds = Grid2xToPhysicalPos(0, 0) - Vector3.right * tileSize / 4 - Vector3.up * tileSize / 4;
         tileHoverMaxBounds = Grid2xToPhysicalPos(gridSize * 2 - 1, gridSize * 2 - 1) + Vector3.right * tileSize / 4 + Vector3.up * tileSize / 4;
         tileHoverMinBounds = Camera.main.WorldToScreenPoint(tileHoverMinBounds);
@@ -124,8 +135,6 @@ public class GameManager : MonoBehaviour
         gemPlacementGraphic.transform.localScale = Vector3.one * tileSize;
         wizardTowerGraphic.transform.localScale = Vector3.one * wizardTowerGraphic.transform.localScale.x * tileSize;
 
-        ResetGame();
-
         audioSource = GetComponent<AudioSource>();
         pathfinder = GetComponent<Pathfinding>();
 
@@ -134,19 +143,19 @@ public class GameManager : MonoBehaviour
         {
             new float[]
             {
-                100, 0, 0, 0, 0
+                80, 20, 0, 0, 0
             },
             new float[]
             {
-                50, 50, 0, 0, 0
+                40, 40, 20, 0, 0
             },
             new float[]
             {
-                20, 50, 30, 0, 0
+                0, 40, 40, 20, 0
             },
             new float[]
             {
-                0, 30, 40, 30, 0
+                0, 0, 40, 40, 20
             },
             new float[]
             {
@@ -155,8 +164,14 @@ public class GameManager : MonoBehaviour
 
         };
 
+        ResetGame();
+
+        startScreen.SetActive(true);
+
+
         // set initial upgrade chances
         UpdateUpgradeChances();
+
         //initialize grid with map shape
         grid = new int[gridSize][];
 
@@ -311,13 +326,55 @@ public class GameManager : MonoBehaviour
 
     private void ResetGame()
     {
+        roundNumber = 1;
+        UpdateRoundText();
+
         currentLives = maxLives;
+
         gold = 0;
         UpdateLivesText();
         UpdateGoldText();
 
         upgradeLevel = 0;
         UpdateUpgradeChances();
+
+        if (paused) OnPauseButtonPressed();
+        if (fastForwarding) OnFastForwardButtonPressed();
+
+        if (spawnCoroutine != null) StopCoroutine(spawnCoroutine);
+        if (gameState == 1 && onRoundEnd != null) onRoundEnd.Invoke();
+
+        // destroy all towers and enemies, clear all lists
+        foreach (Enemy e in enemyList)
+        {
+            if (e != null)
+            {
+                Destroy(e.gameObject);
+            }
+        }
+
+        enemyList.Clear();
+
+        foreach (Tower t in placedTowers)
+        {
+            if (t != null) Destroy(t.gameObject);
+        }
+
+        placedTowers.Clear();
+
+        foreach (Tower t in rocks)
+        {
+            if (t != null) Destroy(t.gameObject);
+        }
+        rocks.Clear();
+
+        foreach (Tower t in keptTowers)
+        {
+            if (t != null) Destroy(t.gameObject);
+        }
+        keptTowers.Clear();
+
+        ChangePhase(0, true);
     }
 
     private void UpdateLivesText()
@@ -330,9 +387,16 @@ public class GameManager : MonoBehaviour
         goldText.text = "Gold: " + gold;
     }
 
+    private void UpdateRoundText()
+    {
+        roundText.text = $"Round: {roundNumber}/{finalRound}";
+    }
+
     private void UpdateUpgradeChances()
     {
-        for (int i = 0; i < 5; i++)
+        print("upgrade level: " + upgradeLevel);
+
+        for (int i = 0; i < tierChanceUpgradeLevels.Length; i++)
         {
             tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
         }
@@ -359,9 +423,9 @@ public class GameManager : MonoBehaviour
     }
 
     // called when the gamestate / phase changes, handles all logic that happens at the beginning of a phase
-    private void ChangePhase(int phase)
+    private void ChangePhase(int phase, bool reset = false)
     {
-        if (gameState == 1)
+        if (gameState == 1 && !reset)
         {
             if (onRoundEnd != null)
             {
@@ -370,6 +434,14 @@ public class GameManager : MonoBehaviour
 
             // increment round number
             roundNumber++;
+            UpdateRoundText();
+
+            if (roundNumber == finalRound + 1)
+            {
+                gameOver = true;
+                ResetGame();
+                victoryScreen.SetActive(true);
+            }
         }
 
         gameState = phase;
@@ -380,6 +452,7 @@ public class GameManager : MonoBehaviour
 
         if (phase == 0)
         {
+            placingGems = false;
             placeGemsButton.SetActive(true);
             upgradeChancesButton.SetActive(true);
 
@@ -398,14 +471,18 @@ public class GameManager : MonoBehaviour
                 onRoundStart.Invoke();
             }
 
-            StartCoroutine(SpawnEnemies());
+            spawnCoroutine = SpawnEnemies();
+            StartCoroutine(spawnCoroutine);
+
+            // unpause the game, so player's don't accidentally stay in pause and wonder why the round isn't starting
+            if (paused) OnPauseButtonPressed();
         }
     }
 
     private IEnumerator SpawnEnemies()
     {
         //if roundNumber % 5 == 0, it’s a flying enemy round – communicate this via bool parameter in the path generation function call
-        bool flyingRound = roundNumber % 5 == 0;
+        bool flyingRound = roundNumber % flyingRoundEvery == 0;
 
         //use pathfinder to generate enemy path based on grid and waypointCoords
         List<Vector3> path = pathfinder.GetPath(grid, flyingRound);
@@ -440,6 +517,9 @@ public class GameManager : MonoBehaviour
         if (currentLives <= 0)
         {
             // TODO: game over screen + game reset
+            ResetGame();
+            gameOverScreen.SetActive(true);
+            gameOver = true;
         }
 
         UpdateLivesText();
@@ -448,6 +528,7 @@ public class GameManager : MonoBehaviour
     public void OnEnemyKilled()
     {
         gold += 3 + Mathf.FloorToInt(roundNumber * 1.5f);
+        UpdateGoldText();
         audioSource.PlayOneShot(enemyDeathClip);
     }
 
@@ -558,7 +639,7 @@ public class GameManager : MonoBehaviour
         t.gameManager = this;
         placedTowers.Add(t);
 
-        if (placedTowers.Count == 5) gemPlacementGraphic.SetActive(false);
+        if (placedTowers.Count == maxPlacedTowers) gemPlacementGraphic.SetActive(false);
 
         //block off the new tower’s grid positions in grid
         for (int x = grCoords[0]; x < grCoords[0] + 2; x++)
@@ -598,10 +679,12 @@ public class GameManager : MonoBehaviour
     void Update()
     {
 
+        if (!gameStarted || gameOver) return;
+
         if (gameState == 0 && placingGems)
         {
 
-            if (placedTowers.Count == 5)
+            if (placedTowers.Count == maxPlacedTowers)
             {
                 // dev shortcut - delete all gems and lets you place new ones
                 if (Input.GetKeyDown(KeyCode.Space))
@@ -739,6 +822,10 @@ public class GameManager : MonoBehaviour
             {
                 //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
                 t.OnNotKept();
+
+                // add to rocks list
+                rocks.Add(t);
+
                 SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
                 sr.color = new Color(0.2f, 0.2f, 0.2f);
                 //sr.sprite = rockSprite;
@@ -875,5 +962,19 @@ public class GameManager : MonoBehaviour
             Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMaxBounds), 0.05f);
 
         }
+    }
+
+    // called when the try again button on the game over screen is pressed
+    public void TryAgainButtonPressed()
+    {
+        gameOver = false;
+
+        gameOverScreen.SetActive(false);
+    }
+
+    public void StartGameButtonPressed()
+    {
+        gameStarted = true;
+        startScreen.SetActive(false);
     }
 }
