@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
     // in the int grid - 0 = empty space, 1 = path, 2 = flagstone, 3+ = waypoints
     int[][] grid;
     public int gridSize = 24;
-    public GameObject tilePrefab, towerPrefab, enemyPrefab, projectilePrefab;
+    public GameObject tilePrefab, towerPrefab, enemyPrefab, projectilePrefab, floatingTextPrefab;
     public Sprite grassSprite, pathSprite, flagstoneSprite;
 
     // ui items
@@ -394,7 +394,6 @@ public class GameManager : MonoBehaviour
 
     private void UpdateUpgradeChances()
     {
-        print("upgrade level: " + upgradeLevel);
 
         for (int i = 0; i < tierChanceUpgradeLevels.Length; i++)
         {
@@ -527,7 +526,12 @@ public class GameManager : MonoBehaviour
 
     public void OnEnemyKilled()
     {
-        gold += 3 + Mathf.FloorToInt(roundNumber * 1.5f);
+        int goldInc = 3 + Mathf.FloorToInt(roundNumber * 1.5f);
+        gold += goldInc;
+
+        SpawnFloatingTextAtScreenPos($"+{goldInc}", goldText.transform.position, Color.green, 1);
+
+
         UpdateGoldText();
         audioSource.PlayOneShot(enemyDeathClip);
     }
@@ -566,7 +570,8 @@ public class GameManager : MonoBehaviour
 
         if (grCoords == null)
         {
-            print("invalid coords - off grid");
+            SpawnFloatingTextAtMouse("Can't place a tower here!", Color.red, 1);
+
             return;
         }
 
@@ -591,7 +596,7 @@ public class GameManager : MonoBehaviour
             {
                 if (x < 0 || y < 0 || x >= gridSize * 2 || y >= gridSize * 2)
                 {
-                    print("invalid coords - goes off screen");
+                    SpawnFloatingTextAtMouse("Can't place a tower here!", Color.red, 1);
                     return;
                 }
 
@@ -599,12 +604,12 @@ public class GameManager : MonoBehaviour
 
                 if (valAtCoords >= 2)
                 {
-                    print("invalid coords - placed on flagstone");
+                    SpawnFloatingTextAtMouse("Can't place a tower here!", Color.red, 1);
                     return;
                 }
                 else if (valAtCoords == -1)
                 {
-                    print("invalid coords - placed on other tower");
+                    SpawnFloatingTextAtMouse("Can't place a tower here!", Color.red, 1);
                     return;
                 }
 
@@ -621,7 +626,7 @@ public class GameManager : MonoBehaviour
 
         if (pathPoints == null)
         {
-            print("invalid coords: blocks enemies!");
+            SpawnFloatingTextAtMouse("Can't block enemies' path!", Color.red, 1);
             return;
         }
 
@@ -901,14 +906,23 @@ public class GameManager : MonoBehaviour
 
     public void UpgradeButtonPressed()
     {
-        if (gold < upgradeGold || upgradeLevel == tierChanceUpgradeLevels.Length - 1) return;
-        
-        // do floating text "not enough gold!"
+        if (gold < upgradeGold || upgradeLevel == tierChanceUpgradeLevels.Length - 1)
+        {
+            // do floating text "not enough gold!"
+            SpawnFloatingTextAtMouse("Not enough gold!", Color.red, -1);
+            return;
+        }
 
         gold -= upgradeGold;
         UpdateGoldText();
 
+        SpawnFloatingTextAtMouse("Chances upgraded!", Color.green, -1);
+        SpawnFloatingTextAtScreenPos($"-{upgradeGold}", goldText.transform.position, Color.red, 1);
+
         upgradeLevel++;
+
+
+
 
         UpdateUpgradeChances();
     }
@@ -976,5 +990,25 @@ public class GameManager : MonoBehaviour
     {
         gameStarted = true;
         startScreen.SetActive(false);
+    }
+
+    public void SpawnFloatingText(string fText, Vector3 pos, Color c, int floatDirection = 1, float lifetime = -1, float fontSize = -1)
+    {
+        GameObject text = Instantiate(floatingTextPrefab);
+        FloatingText ft = text.GetComponent<FloatingText>();
+        ft.InitFloatingText(fText, pos, c, floatDirection, lifetime < 0 ? 3 : ft.lifetime, fontSize < 0 ? ft.text.fontSize : fontSize);
+    }
+
+    public void SpawnFloatingTextAtMouse(string fText, Color c, int floatDirection = 1, float lifetime = -1, float fontSize = -1)
+    {
+       
+        SpawnFloatingTextAtScreenPos(fText, Input.mousePosition, c, floatDirection, lifetime, fontSize);
+    }
+
+    public void SpawnFloatingTextAtScreenPos(string fText, Vector3 screenPos, Color c, int floatDirection = 1, float lifetime = -1, float fontSize = -1)
+    {
+        GameObject text = Instantiate(floatingTextPrefab);
+        FloatingText ft = text.GetComponent<FloatingText>();
+        ft.InitFloatingText(fText, Camera.main.ScreenToWorldPoint(screenPos), c, floatDirection, lifetime < 0 ? 3 : ft.lifetime, fontSize < 0 ? ft.text.fontSize : fontSize);
     }
 }

@@ -569,17 +569,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   finalRound: 20
+  flyingRoundEvery: 5
   gridSize: 24
   tilePrefab: {fileID: 7865275775671799299, guid: 5d429f9e437cdf34bbdfa3bae279f5a8, type: 3}
   towerPrefab: {fileID: 7696230383387873582, guid: f86bcc3e034dff748abe4e4d4a658ffd, type: 3}
   enemyPrefab: {fileID: 4991900880365385184, guid: 76d00ac8d5095c64b82e5d339615334f, type: 3}
   projectilePrefab: {fileID: 7046376277679732282, guid: f9306406044d3004e87bb2e2e57820af, type: 3}
+  floatingTextPrefab: {fileID: 1313320917462536494, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
   grassSprite: {fileID: 0}
   pathSprite: {fileID: 0}
   flagstoneSprite: {fileID: 0}
   placeGemsButton: {fileID: 851264418}
   upgradeChancesButton: {fileID: 1636937802}
   gemPlacementGraphic: {fileID: 1105869188}
+  maxPlacedTowers: 5
   enemyDeathClip: {fileID: 0}
   hoverBox: {fileID: 1161497056}
   hoverBoxText: {fileID: 0}
@@ -645,7 +648,7 @@ MonoBehaviour:
   enemyToTowerScalingRatio: 1.1
   goldText: {fileID: 73919581}
   livesText: {fileID: 607670371}
-  roundText: {fileID: 0}
+  roundText: {fileID: 695285640}
   upgradeChancesButtonText: {fileID: 832281908}
   startScreen: {fileID: 1327785282}
   gameOverScreen: {fileID: 1048822688}
@@ -1822,6 +1825,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 832281906}
   m_CullTransparentMesh: 1
+--- !u!1001 &835975344
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1313320917462536494, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_Name
+      value: FloatingTextPrefab 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.06703606
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.9784386
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -10.032728
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5509258454165333438, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
 --- !u!1 &851264418
 GameObject:
   m_ObjectHideFlags: 0
@@ -4573,3 +4633,4 @@ SceneRoots:
   - {fileID: 113013986}
   - {fileID: 1105869190}
   - {fileID: 592847805}
+  - {fileID: 835975344}
