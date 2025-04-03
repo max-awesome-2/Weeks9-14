@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,11 +27,11 @@ public class GameManager : MonoBehaviour
     // in the int grid - 0 = empty space, 1 = path, 2 = flagstone, 3+ = waypoints
     int[][] grid;
     public int gridSize = 24;
-    public GameObject tilePrefab, towerPrefab;
+    public GameObject tilePrefab, towerPrefab, enemyPrefab, projectilePrefab;
     public Sprite grassSprite, pathSprite, flagstoneSprite;
 
     // ui items
-    public GameObject placeGemsButton;
+    public GameObject placeGemsButton, upgradeChancesButton;
 
     // pathfinding
     Pathfinding pathfinder;
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
     // tower placement
     // we need a list to keep towers that have been placed this placement phase,
     // then another list to hold all kept towers - this is necessary in order to figure out opal buffs
-    List<Tower> placedTowers, keptTowers;
+    List<Tower> placedTowers = new List<Tower>(), keptTowers = new List<Tower>();
     public GameObject gemPlacementGraphic;
 
     // sfx
@@ -72,7 +73,8 @@ public class GameManager : MonoBehaviour
     // enemy stats
     public float baseEnemyHealth; // base enemy health
     public int enemyCount = 20;
-    private List<Enemy> enemyList; // contains all spawned enemies
+    public float enemySpawnDelay = 1f;
+    private List<Enemy> enemyList = new List<Enemy>(); // contains all spawned enemies
 
     // time
     private bool paused = false;
@@ -97,7 +99,7 @@ public class GameManager : MonoBehaviour
     public float enemyToTowerScalingRatio = 1.1f;
 
     // unityevents
-    private UnityEvent onRoundStart, onRoundEnd;
+    private UnityEvent onRoundStart = new UnityEvent(), onRoundEnd = new UnityEvent();
 
     // debug stuff
     private List<Vector3> pathfindingPath;
@@ -110,7 +112,8 @@ public class GameManager : MonoBehaviour
         tileHoverMaxBounds = Camera.main.WorldToScreenPoint(tileHoverMaxBounds);
         oneTileScreenSize = (tileHoverMaxBounds.x - tileHoverMinBounds.x) / (gridSize * 2);
 
-        print("one tile screen size: " + oneTileScreenSize);
+        // set sizes based on tilesize
+        gemPlacementGraphic.transform.localScale = Vector3.one * tileSize;
 
         audioSource = GetComponent<AudioSource>();
         pathfinder = GetComponent<Pathfinding>();
@@ -141,6 +144,12 @@ public class GameManager : MonoBehaviour
 
         };
 
+        // set initial upgrade chances
+        for (int i = 0; i < 5; i++)
+        {
+            tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
+        }
+
         //initialize grid with map shape
         grid = new int[gridSize][];
 
@@ -169,7 +178,7 @@ public class GameManager : MonoBehaviour
         //grid[22] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         //grid[23] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-        grid[0] = new int[]   { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[0] = new int[]   { 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[1] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[2] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[3] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -197,19 +206,23 @@ public class GameManager : MonoBehaviour
         // loop through grid and spawn tiles at each grid location
 
         int[][] newGrid = new int[gridSize * 2][];
+        for (int x = 0; x < gridSize; x++)
+        {
+            newGrid[x * 2] = new int[gridSize * 2];
+            newGrid[x * 2 + 1] = new int[gridSize * 2];
+        }
 
         // gets the list of top-left waypoint coordinates in the gridsize * 2 system
         List<int[]> waypointCoords = new List<int[]>();
+
+        // calculate top left tile corner based off of center - center the grid, basically
+        topLeftTileCorner = -(gridSize / 2) * tileSize * (Vector3.right - Vector3.up);
 
         // use for loops to expand each cell into a 2x2 square, doubling grid size(towers take up a 2x2 square, but this allows them to be placed at offsets of 0.5 spaces)
         // also scan through grid and add all waypoint coordinates(in order) to waypointCoords
         for (int x = 0; x < gridSize; x++)
         {
             Vector3 rowPos = topLeftTileCorner + Vector3.down * x * tileSize;
-
-            newGrid[x * 2] = new int[gridSize * 2];
-            newGrid[x * 2 + 1] = new int[gridSize * 2];
-
 
             for (int y = 0; y < gridSize; y++)
             {
@@ -266,12 +279,12 @@ public class GameManager : MonoBehaviour
                 }
 
                 // replace waypoints with flagstone except for the topleft corner
-
                 newGrid[x * 2][y * 2] = cornerVal;
                 newGrid[x * 2 + 1][y * 2] = val;
 
                 newGrid[x * 2][y * 2 + 1] = val;
                 newGrid[x * 2 + 1][y * 2 + 1] = val;
+
             }
         }
 
@@ -281,28 +294,45 @@ public class GameManager : MonoBehaviour
         pathfinder.waypoints = waypointCoords;
 
         pathfindingPath = pathfinder.GetPath(grid, false);
+
+        // start first placement phase
+        ChangePhase(0);
     }
 
-    public void OnEnemyKilled()
-    {
-        //gold += (gold etc.)
-        gold += 3 + Mathf.FloorToInt(roundNumber * 1.5f);
-        audioSource.PlayOneShot(enemyDeathClip);
-    }
 
     public void OnPlaceGemsButtonClicked()
     {
         placingGems = true;
         placeGemsButton.SetActive(false);
+        gemPlacementGraphic.SetActive(true);
+
     }
 
     // called when the gamestate / phase changes, handles all logic that happens at the beginning of a phase
     private void ChangePhase(int phase)
     {
+        if (gameState == 1)
+        {
+            if (onRoundEnd != null)
+            {
+                onRoundEnd.Invoke();
+            }
+
+            // increment round number
+            roundNumber++;
+        }
+
         gameState = phase;
+        gemPlacementGraphic.SetActive(false);
+
+        enemyList.Clear();
+
+
         if (phase == 0)
         {
             placeGemsButton.SetActive(true);
+            upgradeChancesButton.SetActive(true);
+
 
             placedTowers.Clear();
 
@@ -310,17 +340,55 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            //if roundNumber % 5 == 0, it’s a flying enemy round – communicate this via bool parameter in the path generation function call
-            bool flyingRound = roundNumber % 5 == 0;
-
-            //use pathfinder to generate enemy path based on grid and waypointCoords
-            List<Vector3> path = pathfinder.GetPath(grid, flyingRound);
-
-            // cache it for debug
-            pathfindingPath = path;
+            upgradeChancesButton.SetActive(false);
 
 
+            if (onRoundStart != null)
+            {
+                onRoundStart.Invoke();
+            }
+
+            StartCoroutine(SpawnEnemies());
         }
+    }
+
+    private IEnumerator SpawnEnemies()
+    {
+        //if roundNumber % 5 == 0, it’s a flying enemy round – communicate this via bool parameter in the path generation function call
+        bool flyingRound = roundNumber % 5 == 0;
+
+        //use pathfinder to generate enemy path based on grid and waypointCoords
+        List<Vector3> path = pathfinder.GetPath(grid, flyingRound);
+
+        // cache it for debug
+        pathfindingPath = path;
+
+        float newEnemyHp = baseEnemyHealth * GetEnemyStatRatio(roundNumber);
+
+        for (int i = 0; i < enemyCount; i++)
+        {
+            GameObject newEnemy = Instantiate(enemyPrefab, path[0], Quaternion.identity);
+            newEnemy.transform.localScale = Vector3.one * newEnemy.transform.localScale.x * tileSize;
+
+            Enemy e = newEnemy.GetComponent<Enemy>();
+            e.InitEnemy(newEnemyHp, path, flyingRound);
+            e.onKilled.AddListener(OnEnemyKilled);
+            e.onReachedTower.AddListener(OnEnemyReachedTower);
+            enemyList.Add(e);
+
+            yield return new WaitForSeconds(enemySpawnDelay);
+        }
+    }
+
+    private void OnEnemyReachedTower()
+    {
+        // todo: fill this in
+    }
+
+    public void OnEnemyKilled()
+    {
+        gold += 3 + Mathf.FloorToInt(roundNumber * 1.5f);
+        audioSource.PlayOneShot(enemyDeathClip);
     }
 
     public Vector3 GridToPhysicalPos(int x, int y)
@@ -366,6 +434,7 @@ public class GameManager : MonoBehaviour
 
         for (int x = 0; x < gridSize * 2; x++)
         {
+            modifiedGrid[x] = new int[gridSize * 2];
             for (int y = 0; y < gridSize * 2; y++)
             {
                 modifiedGrid[x][y] = grid[x][y];
@@ -379,24 +448,27 @@ public class GameManager : MonoBehaviour
         {
             for (int y = grCoords[1]; y < grCoords[1] + 2; y++)
             {
-                if (x < 0 || y < 0 || x >= gridSize || y >= gridSize)
+                if (x < 0 || y < 0 || x >= gridSize * 2 || y >= gridSize * 2)
                 {
                     print("invalid coords - goes off screen");
                     return;
                 }
 
-                int valAtCoords = grid[x][y];
+                int valAtCoords = grid[y][x];
+
                 if (valAtCoords >= 2)
                 {
                     print("invalid coords - placed on flagstone");
+                    return;
                 }
                 else if (valAtCoords == -1)
                 {
                     print("invalid coords - placed on other tower");
+                    return;
                 }
 
                 // set hypothetical grid value
-                modifiedGrid[x][y] = -1;
+                modifiedGrid[y][x] = -1;
             }
         }
 
@@ -418,18 +490,22 @@ public class GameManager : MonoBehaviour
         //if the placement would block the enemy’s path, change the text to ‘must leave path for enemies!’
 
         //instantiate tower from prefab
-        GameObject newTower = Instantiate(towerPrefab);
+        GameObject newTower = Instantiate(towerPrefab, Grid2xToPhysicalPos(grCoords[0], grCoords[1]) + Vector3.right * tileSize / 4 - Vector3.up * tileSize / 4, Quaternion.identity);
+        newTower.transform.localScale = Vector3.one * newTower.transform.localScale.x* tileSize;
 
         //add instantiated tower’s Tower script to placedTowers
         Tower t = newTower.GetComponent<Tower>();
+        t.gameManager = this;
         placedTowers.Add(t);
+
+        if (placedTowers.Count == 5) gemPlacementGraphic.SetActive(false);
 
         //block off the new tower’s grid positions in grid
         for (int x = grCoords[0]; x < grCoords[0] + 2; x++)
         {
             for (int y = grCoords[1]; y < grCoords[1] + 2; y++)
             {
-                grid[x][y] = -1;
+                grid[y][x] = -1;
             }
         }
 
@@ -461,23 +537,33 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            int[] smda = GetGridAtMousePos();
-            if (smda != null) print("grid at mouse: " + smda[0] + ", " + smda[1]);
-        }
 
-        if (gameState == 0 && placingGems && placedTowers.Count == 5)
+        if (gameState == 0 && placingGems)
         {
-
 
             if (placedTowers.Count == 5)
             {
+                // dev shortcut - delete all gems and lets you place new ones
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    for (int i = 0; i < placedTowers.Count; i++)
+                    {
+                        for (int x = placedTowers[i].x; x < placedTowers[i].x + 2; x++)
+                        {
+                            for (int y = placedTowers[i].y; y < placedTowers[i].y + 2; y++)
+                            {
+                                grid[x][y] = 0;
+                            }
+                        }
+                        Destroy(placedTowers[i]);
+                    }
+                    placedTowers.Clear();
+                }
+
                 if (Input.GetMouseButtonDown(1))
                 {
                     int[] coords = GetGridAtMousePos();
 
-                    print("right click during placement");
                     if (coords != null)
                     {
 
@@ -492,7 +578,6 @@ public class GameManager : MonoBehaviour
                             {
                                 // if it matches one, call OnKeepTower(index of the tower)
                                 OnKeepTower(i);
-                                print("KEEPING TOWER AT INDEX " + i);
                             }
                         }
 
@@ -509,9 +594,29 @@ public class GameManager : MonoBehaviour
                 // move the tower placement graphic to the mouse pos
                 int[] coords = GetGridAtMousePos();
                 if (coords != null)
-                    gemPlacementGraphic.transform.position = Grid2xToPhysicalPos(coords[0], coords[1]);
+                    gemPlacementGraphic.transform.position = Grid2xToPhysicalPos(coords[0], coords[1]) + Vector3.right * tileSize / 4 - Vector3.up * tileSize / 4;
 
+                // on left click, try to place a tower
+                if (Input.GetMouseButtonDown(0))
+                {
+                    PlaceTower();
+                }
             }
+        }
+        else if (gameState == 1)
+        {
+            // if all enemies are dead, change back to placement phase
+            bool allEnemiesDead = true;
+            foreach (Enemy e in enemyList)
+            {
+                if (e != null)
+                {
+                    allEnemiesDead = false;
+                    break;
+                }
+            }
+
+            if (allEnemiesDead) ChangePhase(0);
         }
 
         if (hoverBox.activeSelf)
@@ -559,7 +664,7 @@ public class GameManager : MonoBehaviour
 
         // set the spriterenderer’s sprite and color according to the tier and color of the gem
         towerRen.color = gemTypeColors[gemType];
-        towerRen.sprite = gemTierSprites[gemTier];
+        //towerRen.sprite = gemTierSprites[gemTier];
     }
 
     void OnKeepTower(int keptIndex)
@@ -575,8 +680,8 @@ public class GameManager : MonoBehaviour
                 //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
                 t.OnNotKept();
                 SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
-                sr.color = Color.white;
-                sr.sprite = rockSprite;
+                sr.color = new Color(0.2f, 0.2f, 0.2f);
+                //sr.sprite = rockSprite;
             }
             else
             {
@@ -644,7 +749,11 @@ public class GameManager : MonoBehaviour
     public void UpgradeButtonPressed()
     {
         if (gold < upgradeGold) return;
+        
+        // do floating text "not enough gold!"
+
         gold -= upgradeGold;
+
         upgradeLevel++;
 
         for (int i = 0; i < 5; i++)
@@ -679,25 +788,28 @@ public class GameManager : MonoBehaviour
     // gizmos for debug stuff
     private void OnDrawGizmos()
     {
-        if (pathfindingPath != null)
+        if (Application.isPlaying)
         {
-            Vector3 last = pathfindingPath[0];
-            
-            for (int i = 1; i < pathfindingPath.Count; i++)
+            if (pathfindingPath != null)
             {
-                Vector3 next = pathfindingPath[i];
+                Vector3 last = pathfindingPath[0];
 
-                Gizmos.color = Color.red;
-                Gizmos.DrawLine(last, next);
+                for (int i = 1; i < pathfindingPath.Count; i++)
+                {
+                    Vector3 next = pathfindingPath[i];
 
-                last = next;
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawLine(last, next);
+
+                    last = next;
+                }
             }
+
+            Gizmos.color = Color.blue;
+            Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMinBounds), 0.05f);
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMaxBounds), 0.05f);
+
         }
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMinBounds), 0.05f);
-        Gizmos.color = Color.green;
-        Gizmos.DrawSphere(Camera.main.ScreenToWorldPoint(tileHoverMaxBounds), 0.05f);
-
     }
 }

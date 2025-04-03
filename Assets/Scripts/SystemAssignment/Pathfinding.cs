@@ -6,6 +6,9 @@ using static UnityEditor.PlayerSettings;
 
 public class Pathfinding : MonoBehaviour
 {
+    // if true, allows pathing through diagonal gaps in walls (seems a bit unintuitive and the original game didn't allow it so keep it false for now)
+    private bool allowDiagonals = false;
+
     // reference to gamemanager - set in GameManager
     public GameManager gameManager;
 
@@ -132,7 +135,7 @@ public class Pathfinding : MonoBehaviour
                 {
                     for (int y = currentNode.gridY - 1; y <= currentNode.gridY + 1; y++)
                     {
-                        if (x < 0 || x >= gridSize2x || y < 0 || y >= gridSize2x || (x == currentNode.gridX && y == currentNode.gridY))
+                        if (x < 0 || x >= gridSize2x || y < 0 || y >= gridSize2x || (x == currentNode.gridX && y == currentNode.gridY) || (!allowDiagonals && ((x - (currentNode.gridX - 1)) + (y - (currentNode.gridY - 1))) % 2 == 0))
                         {
                             continue;
                         }

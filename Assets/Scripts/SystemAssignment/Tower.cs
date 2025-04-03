@@ -20,24 +20,26 @@ public class Tower : MonoBehaviour
     private IEnumerator attackCoroutine;
 
     // list of enemies that are currently alive in the round – reference to a variable kept + manipulated by GameManager
-    private List<Enemy> allEnemies;
+    public List<Enemy> allEnemies;
 
     private List<Enemy> enemiesInRange = new List<Enemy>();
 
     // stats
     public int gemType;
     public int gemTier;
-    float damage;
+    public float damage;
     public float range;
-    float attackSpeed;
+    public float attackSpeed;
 
     // special stats
     public float opalBonus;
-    float poisonDamage;
-    float poisonTime;
-    float poisonSlow;
-    float freezeSlow;
-    float freezeTime;
+    public float poisonDamage;
+    public float poisonTime;
+    public float poisonSlow;
+    public float freezeSlow;
+    public float freezeTime;
+
+    public float rubySplashRange = 1f;
 
     // keeps track of the total bonus attack speed given to this tower by all opal towers (including itself)
     private float totalOpalBonusRatio = 1f;
@@ -48,6 +50,9 @@ public class Tower : MonoBehaviour
     // events
     public UnityEvent<string, GameObject> onMouseEnter;
     public UnityEvent onMouseExit;
+
+    // ref to gamemanager
+    public GameManager gameManager;
 
     public void InitTower(int type, int tier, float dmg, float range, float atkspd)
     {
@@ -63,8 +68,6 @@ public class Tower : MonoBehaviour
     public void OnKept(UnityEvent roundStart, UnityEvent roundEnd, List<Enemy> enemyList)
     {
         roundStart.AddListener(OnRoundStart);
-
-
         roundEnd.AddListener(OnRoundEnd);
     
         towerState = 1;
@@ -74,6 +77,7 @@ public class Tower : MonoBehaviour
     public void OnNotKept()
     {
         towerState = 2;
+
     }
 
     private void OnRoundStart()
@@ -110,7 +114,27 @@ public class Tower : MonoBehaviour
                 // if there’s still an enemy in range, fire and wait the delay
                 if (enemiesInRange.Count > 0)
                 {
-                    FireProjectile(enemiesInRange[0]);
+                    if (gemType == 4)
+                    {
+                        for (int i = 0; i < enemiesInRange.Count; i++)
+                        {
+                            FireProjectile(enemiesInRange[i]);
+                        }
+                    } else
+                    {
+                        Enemy firstNonNull = null;
+                        for (int i = 0; i < enemiesInRange.Count; i++)
+                        {
+                            if (enemiesInRange[i] != null)
+                            {
+                                firstNonNull = enemiesInRange[i];
+                                break;
+                            }
+                        }
+
+                        if (firstNonNull != null) FireProjectile(firstNonNull);
+                    }
+
                     yield return new WaitForSeconds(1 / attackSpeed);
 
                 }
@@ -120,7 +144,10 @@ public class Tower : MonoBehaviour
 
     void FireProjectile(Enemy target)
     {
+        if (target == null) return;
+
         GameObject proj = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+        proj.transform.localScale = Vector3.one * proj.transform.localScale.x * gameManager.tileSize;
 
         Projectile p = proj.GetComponent<Projectile>();
 
@@ -134,7 +161,10 @@ public class Tower : MonoBehaviour
         for (int i = 0; i < allEnemies.Count; i++)
         {
             Enemy e = allEnemies[i];
+            if (e == null) continue;
             //if e.flying and we are a diamond tower, OR !e.flying and we are an amethyst tower, continue;
+            if (e.flying && gemType == 3 || !e.flying && gemType == 2) continue;
+
             float dist = Vector3.Distance(transform.position, e.transform.position);
             if (enemiesInRange.Contains(e))
             {
