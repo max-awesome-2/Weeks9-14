@@ -48,9 +48,6 @@ public class GameManager : MonoBehaviour
     public GameObject gemPlacementGraphic;
     public int maxPlacedTowers = 5;
 
-    // sfx
-    AudioSource audioSource;
-    public AudioClip enemyDeathClip;
 
     // hover info box
     public GameObject hoverBox;
@@ -135,7 +132,6 @@ public class GameManager : MonoBehaviour
         gemPlacementGraphic.transform.localScale = Vector3.one * tileSize;
         wizardTowerGraphic.transform.localScale = Vector3.one * wizardTowerGraphic.transform.localScale.x * tileSize;
 
-        audioSource = GetComponent<AudioSource>();
         pathfinder = GetComponent<Pathfinding>();
 
         // initialize upgrade level chances
@@ -497,6 +493,7 @@ public class GameManager : MonoBehaviour
             newEnemy.transform.localScale = Vector3.one * newEnemy.transform.localScale.x * tileSize;
 
             Enemy e = newEnemy.GetComponent<Enemy>();
+            e.gameManager = this;
             e.InitEnemy(newEnemyHp, path, flyingRound);
             e.onKilled.AddListener(OnEnemyKilled);
             e.onReachedTower.AddListener(OnEnemyReachedTower);
@@ -529,11 +526,7 @@ public class GameManager : MonoBehaviour
         int goldInc = 3 + Mathf.FloorToInt(roundNumber * 1.5f);
         gold += goldInc;
 
-        SpawnFloatingTextAtScreenPos($"+{goldInc}", goldText.transform.position, Color.green, 1);
-
-
         UpdateGoldText();
-        audioSource.PlayOneShot(enemyDeathClip);
     }
 
     public Vector3 GridToPhysicalPos(int x, int y)
@@ -1009,6 +1002,8 @@ public class GameManager : MonoBehaviour
     {
         GameObject text = Instantiate(floatingTextPrefab);
         FloatingText ft = text.GetComponent<FloatingText>();
-        ft.InitFloatingText(fText, Camera.main.ScreenToWorldPoint(screenPos), c, floatDirection, lifetime < 0 ? 3 : ft.lifetime, fontSize < 0 ? ft.text.fontSize : fontSize);
+        Vector3 spawnPos = Camera.main.ScreenToWorldPoint(screenPos);
+        spawnPos.z = 0;
+        ft.InitFloatingText(fText, spawnPos, c, floatDirection, lifetime < 0 ? 3 : ft.lifetime, fontSize < 0 ? ft.text.fontSize : fontSize);
     }
 }

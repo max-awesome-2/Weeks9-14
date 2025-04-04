@@ -40,6 +40,10 @@ public class Enemy : MonoBehaviour
     private float slowTimer, poisonTimer;
     private bool poisoned = false, frozen = false;
 
+
+    // ref to gamemanager
+    public GameManager gameManager;
+
     void Start()
     {
         source = GetComponent<AudioSource>();
@@ -158,6 +162,7 @@ public class Enemy : MonoBehaviour
     {
         currentHealth -= dmg;
 
+        // if health is less than or equal to zero, destroy this enemy and give the player gold
         if (currentHealth <= 0)
         {
             onKilled.Invoke();
@@ -171,6 +176,8 @@ public class Enemy : MonoBehaviour
             SetHealth(currentHealth);
 
         }
+
+        gameManager.SpawnFloatingText($"-{Mathf.RoundToInt(dmg)}", transform.position + Vector3.up * 0.1f, Color.red);
     }
 
     void SetHealth(float hp)

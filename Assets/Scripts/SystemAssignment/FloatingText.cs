@@ -31,6 +31,10 @@ public class FloatingText : MonoBehaviour
 
         originPos = pos;
 
+        this.text.text = text;
+        this.text.fontSize = fontSize;
+        this.text.color = c;
+
     }
 
     public void SetFontSize(float fontSize)
