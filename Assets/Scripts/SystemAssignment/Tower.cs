@@ -86,9 +86,9 @@ public class Tower : MonoBehaviour
 
         // generate info string
         infoString = $"<b>{gameManager.tierNames[gemTier]} {gameManager.gemNames[gemType]}<b>\n\n" + 
-            $"Damage: {dmg}\n" +
-            $"Range: {dmg}\n" +
-            $"Attack Speed: {atkspd}\n\n";
+            $"Damage: {RoundToDecimalPlaces(dmg, 2)}\n" +
+            $"Range: {RoundToDecimalPlaces(range, 2)}\n" +
+            $"Attack Speed: {RoundToDecimalPlaces(atkspd, 2)}\n\n";
 
         if (gemType == 0)
         {
@@ -313,4 +313,11 @@ public class Tower : MonoBehaviour
         return returnDamage;
     }
 
+
+    private float RoundToDecimalPlaces(float num, int places)
+    {
+        int mult = 10 * places;
+
+        return Mathf.Round(num * mult) / mult;
+    }
 }

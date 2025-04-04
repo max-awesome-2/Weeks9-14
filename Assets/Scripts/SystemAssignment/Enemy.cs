@@ -174,7 +174,8 @@ public class Enemy : MonoBehaviour
 
         }
 
-        gameManager.SpawnFloatingText($"-{Mathf.RoundToInt(dmg)}", transform.position + Vector3.up * 0.1f, Color.red);
+        Vector3 offset = Random.insideUnitCircle * Random.Range(0, 0.5f);
+        gameManager.SpawnFloatingText($"-{Mathf.RoundToInt(dmg)}", transform.position + (Vector3.up * 0.1f) + offset, Color.red, 1, 1.5f, 35);
     }
 
     void SetHealth(float hp)

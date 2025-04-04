@@ -811,7 +811,10 @@ public class GameManager : MonoBehaviour
         }
         else if (gameState == 1)
         {
-            // if all enemies are dead, change back to placement phase
+
+            if (enemyList.Count != enemyCount) return;
+
+            // if all enemies have been spawned and all are dead, change back to placement phase
             bool allEnemiesDead = true;
             foreach (Enemy e in enemyList)
             {
@@ -851,8 +854,7 @@ public class GameManager : MonoBehaviour
         //atkSpeed *= tierRatio;
 
         // initialize the gem with its stats
-        t.InitTower(gemType, gemTier, dmg, range, atkSpeed);
-
+        // initialize special stats first so they appear in the info text
         if (gemType == 0)
         {
             t.SetPoisonStats(basePoisonDPS * tierRatio, poisonTime, poisonSlowMultiplier);
@@ -865,6 +867,8 @@ public class GameManager : MonoBehaviour
         {
             t.SetOpalStats(opalBaseASRatio + opalASRatioIncPerTier * gemTier);
         }
+
+        t.InitTower(gemType, gemTier, dmg, range, atkSpeed);
 
         //use getcomponent to get new tower’s spriterenderer
         SpriteRenderer towerRen = t.GetComponent<SpriteRenderer>();
@@ -947,8 +951,6 @@ public class GameManager : MonoBehaviour
         hoverBoxText.text = hoverInfo;
 
         // set hoverbox local position based on which side of the screen the mouse is closest to
-        int side = 0;
-
         float x = hoverBoxParent.transform.position.x;
         float y = hoverBoxParent.transform.position.y;
 
@@ -960,7 +962,7 @@ public class GameManager : MonoBehaviour
         if (y > Screen.height / 2) vert = -1;
         else vert = 1;
 
-        hoverBox.transform.localPosition = new Vector3(hoverBox.sizeDelta.x / 2 * horiz, hoverBox.sizeDelta.y / 2 * vert);
+        hoverBox.transform.localPosition = new Vector3(hoverBox.sizeDelta.x / 2 * horiz, hoverBox.sizeDelta.y / 2 * vert) + Vector3.right * horiz * 20 + Vector3.up * vert * 20;
     }
 
     public void OnMouseExitObjectOfInterest()
@@ -1069,20 +1071,20 @@ public class GameManager : MonoBehaviour
         startScreen.SetActive(false);
     }
 
-    public void SpawnFloatingText(string fText, Vector3 pos, Color c, int floatDirection = 1, float lifetime = -1, float fontSize = -1)
+    public void SpawnFloatingText(string fText, Vector3 pos, Color c, float floatDirection = 1, float lifetime = -1, float fontSize = -1)
     {
         GameObject text = Instantiate(floatingTextPrefab);
         FloatingText ft = text.GetComponent<FloatingText>();
         ft.InitFloatingText(fText, pos, c, floatDirection, lifetime < 0 ? 3 : ft.lifetime, fontSize < 0 ? ft.text.fontSize : fontSize);
     }
 
-    public void SpawnFloatingTextAtMouse(string fText, Color c, int floatDirection = 1, float lifetime = -1, float fontSize = -1)
+    public void SpawnFloatingTextAtMouse(string fText, Color c, float floatDirection = 1, float lifetime = -1, float fontSize = -1)
     {
        
         SpawnFloatingTextAtScreenPos(fText, Input.mousePosition, c, floatDirection, lifetime, fontSize);
     }
 
-    public void SpawnFloatingTextAtScreenPos(string fText, Vector3 screenPos, Color c, int floatDirection = 1, float lifetime = -1, float fontSize = -1)
+    public void SpawnFloatingTextAtScreenPos(string fText, Vector3 screenPos, Color c, float floatDirection = 1, float lifetime = -1, float fontSize = -1)
     {
         GameObject text = Instantiate(floatingTextPrefab);
         FloatingText ft = text.GetComponent<FloatingText>();
@@ -1094,7 +1096,7 @@ public class GameManager : MonoBehaviour
     {
         if (upgradeLevel != tierChanceUpgradeCosts.Length - 1)
         {
-            OnHoverObjectOfInterest("Upgrade chances for higher tier gems." +
+            OnHoverObjectOfInterest("Upgrade chances for higher tier gems.\n" +
             $"Upgrade cost: {upgradeGold} gold\n\n" + 
             $"Current chances: \n" + 
             $"Chipped: {tierChances[0]}%\n" +
@@ -1112,7 +1114,7 @@ public class GameManager : MonoBehaviour
 
     public void OnMouseEnterPlaceGemsButton()
     {
-        OnHoverObjectOfInterest($"Start placing gems.\n You may place {maxPlacedTowers} gems, then you must choose one to keep by RIGHT-CLICKING it.");
+        OnHoverObjectOfInterest($"Start placing gems.\n\n You may place {maxPlacedTowers} gems, then you must choose one to keep by RIGHT-CLICKING it.\n\nTIP: You can use gems to block the enemies' path.");
     }
 
     private void OnVictory()

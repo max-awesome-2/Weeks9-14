@@ -181,8 +181,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: YOU WIN
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8df7f6ced03eef948b231d46e57f497d, type: 2}
+  m_sharedMaterial: {fileID: -48040224374977597, guid: 8df7f6ced03eef948b231d46e57f497d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -448,8 +448,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Gold: 0'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -885,8 +885,8 @@ MonoBehaviour:
   m_text: REWIND TIME WITH MY MAGIC ORB! I WISH TO SHOW THE BARBARIANS MY WRATH A
     SECOND TIME!
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1139,8 +1139,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Lives: 0'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1273,8 +1273,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Pause
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1448,8 +1448,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Round: 1/20'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1619,7 +1619,6 @@ RectTransform:
   m_Children:
   - {fileID: 805416412}
   - {fileID: 663212346}
-  - {fileID: 1058650012}
   - {fileID: 1327785283}
   - {fileID: 1048822689}
   - {fileID: 1568034177}
@@ -1665,7 +1664,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -67.3}
+  m_AnchoredPosition: {x: 0, y: -27.43}
   m_SizeDelta: {x: 549.71, y: 60.900024}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &822556365
@@ -1802,8 +1801,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Upgrade Chances
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2219,8 +2218,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: GAME OVER
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8df7f6ced03eef948b231d46e57f497d, type: 2}
+  m_sharedMaterial: {fileID: -48040224374977597, guid: 8df7f6ced03eef948b231d46e57f497d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2333,41 +2332,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &1058650011
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1058650012}
-  m_Layer: 5
-  m_Name: StartScreen
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1058650012
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1058650011}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 776169802}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1071204561
 GameObject:
   m_ObjectHideFlags: 0
@@ -2427,8 +2391,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Place Gems
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2561,8 +2525,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: BRING IT ON
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2817,8 +2781,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: GEM TOWER DEFENSE
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8df7f6ced03eef948b231d46e57f497d, type: 2}
+  m_sharedMaterial: {fileID: -48040224374977597, guid: 8df7f6ced03eef948b231d46e57f497d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2842,8 +2806,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 68.39
-  m_fontSizeBase: 68.39
+  m_fontSize: 96.18
+  m_fontSizeBase: 96.18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3333,8 +3297,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3509,8 +3473,8 @@ MonoBehaviour:
     BETTER
     LUCK NEXT TIME PARDNER!'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3534,8 +3498,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32.8
-  m_fontSizeBase: 32.8
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3868,7 +3832,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: hover box
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -3932,7 +3896,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1750492757
@@ -4002,8 +3966,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: REWIND TIME WITH YOUR MAGIC ORB
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4089,7 +4053,7 @@ GameObject:
   - component: {fileID: 1812254068}
   - component: {fileID: 1812254067}
   m_Layer: 5
-  m_Name: GameOverText
+  m_Name: VictoryText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4138,8 +4102,8 @@ MonoBehaviour:
 
     GOOD JOB!'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4163,8 +4127,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32.8
-  m_fontSizeBase: 32.8
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -4248,7 +4212,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 959, y: 79.400024}
+  m_SizeDelta: {x: 938, y: 79.400024}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1819742508
 MonoBehaviour:
@@ -4273,13 +4237,14 @@ MonoBehaviour:
   m_text: 'Whoops, you forgot to maintain your force field and now THE BARBARIANS
     have come to SACK YOUR TOWER!
 
-    Use your MAGIC GEMS to fend them off and defend
-    your RICHES!
+
+    Use your MAGIC GEMS to fend them off and
+    defend your RICHES!
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
+  m_sharedMaterial: {fileID: -8309165161498307191, guid: b0e31d05dba83e24589bcf25006337f4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
