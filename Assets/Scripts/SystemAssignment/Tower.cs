@@ -49,7 +49,7 @@ public class Tower : MonoBehaviour
     public GameObject projectilePrefab;
 
     // events
-    public UnityEvent<string, GameObject> onMouseEnter;
+    public UnityEvent<string> onMouseEnter;
     public UnityEvent onMouseExit;
 
     // ref to gamemanager
@@ -60,6 +60,12 @@ public class Tower : MonoBehaviour
 
     // debug
     public TextMeshProUGUI tierText;
+
+
+    // hover box info string
+    private string infoString;
+
+    public bool waitingForKeep = false;
 
     public void InitTower(int type, int tier, float dmg, float range, float atkspd)
     {
@@ -77,6 +83,46 @@ public class Tower : MonoBehaviour
         rangeIndicator.transform.parent = null;
         rangeIndicator.transform.localScale = Vector3.one * range;
         rangeIndicator.transform.SetParent(prevParent);
+
+        // generate info string
+        infoString = $"<b>{gameManager.tierNames[gemTier]} {gameManager.gemNames[gemType]}<b>\n\n" + 
+            $"Damage: {dmg}\n" +
+            $"Range: {dmg}\n" +
+            $"Attack Speed: {atkspd}\n\n";
+
+        if (gemType == 0)
+        {
+            infoString += $"Attacks poison enemies for {poisonTime} seconds, slowing them by {Mathf.RoundToInt(poisonSlow * 100)}% and dealing {Mathf.RoundToInt(poisonDamage)} damage per second.";
+        }
+        else if (gemType == 1)
+        {
+            infoString += $"Attacks chill enemies for {freezeTime} seconds, slowing them by {Mathf.RoundToInt(freezeSlow * 100)}%";
+        }
+        else if (gemType == 2)
+        {
+            infoString += $"Only attacks flying units (every 5 rounds, all enemies are flying).";
+        }
+        else if (gemType == 3)
+        {
+            infoString += $"25% chance to deal double damage. Only attacks ground units.";
+        }
+        else if (gemType == 4)
+        {
+            infoString += $"Attacks ALL enemies in range.";
+        }
+        else if (gemType == 5)
+        {
+            infoString += $"Attacks much faster than other gems.";
+        }
+        else if (gemType == 6)
+        {
+            infoString += $"Gives all other gems within range a {Mathf.RoundToInt(opalBonus * 100)}% attack speed bonus.";
+        }
+        else if (gemType == 7)
+        {
+            infoString += $"Deals splash damage in a range of {rubySplashRange}.";
+        }
+
     }
 
     public void OnKept(UnityEvent roundStart, UnityEvent roundEnd, List<Enemy> enemyList)
@@ -206,7 +252,14 @@ public class Tower : MonoBehaviour
             //invoke OnMouseEnter with a string describing this gem’s stats
             //(so that they get displayed in the hover box)
 
-            //if (onMouseEnter != null) onMouseEnter.Invoke();
+            string outInfoString = infoString;
+
+            if (waitingForKeep)
+            {
+                outInfoString = "(RIGHT CLICK TO KEEP THIS GEM)\n" + outInfoString;
+            }
+
+            if (onMouseEnter != null) onMouseEnter.Invoke(infoString);
 
             rangeIndicator.SetActive(true);
         }
@@ -218,7 +271,10 @@ public class Tower : MonoBehaviour
         {
             // OnMouseExit(so that hover box gets dismissed)
             rangeIndicator.SetActive(false);
+
         }
+
+        if (onMouseExit != null) onMouseExit.Invoke();
     }
 
     public void SetPoisonStats(float poisonDmg, float poisonTime, float poisonSlow)
@@ -256,4 +312,5 @@ public class Tower : MonoBehaviour
 
         return returnDamage;
     }
+
 }

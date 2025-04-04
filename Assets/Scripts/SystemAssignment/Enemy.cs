@@ -30,9 +30,6 @@ public class Enemy : MonoBehaviour
 
     public UnityEvent onReachedTower = new UnityEvent(), onKilled = new UnityEvent();
 
-    private AudioSource source;
-    public AudioClip hitSound;
-
     public Color poisonedColor = Color.green, regularColor = Color.red, frozenColor = Color.blue;
 
     // poison / freeze variables
@@ -46,7 +43,7 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
-        source = GetComponent<AudioSource>();
+
     }
 
     // called from GameManager
@@ -95,7 +92,7 @@ public class Enemy : MonoBehaviour
             GetComponent<SpriteRenderer>().color = frozen ? frozenColor : regularColor;
             poisoned = false;
         }
-        if (frozen && Time.time > poisonTimer)
+        if (frozen && Time.time > slowTimer)
         {
             GetComponent<SpriteRenderer>().color = poisoned ? poisonedColor : regularColor;
             frozen = false;
@@ -149,7 +146,7 @@ public class Enemy : MonoBehaviour
 
     private void OnSlow(float slow, float sTime)
     {
-        slowTimer = sTime;
+        slowTimer = Time.time + sTime;
         freezeSlowRatio = slow;
 
         GetComponent<SpriteRenderer>().color = frozenColor;
@@ -165,6 +162,7 @@ public class Enemy : MonoBehaviour
         // if health is less than or equal to zero, destroy this enemy and give the player gold
         if (currentHealth <= 0)
         {
+
             onKilled.Invoke();
 
             // if we’re allowed to use particles by this point, instantiate death particle prefab
@@ -172,7 +170,6 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            source.PlayOneShot(hitSound);
             SetHealth(currentHealth);
 
         }

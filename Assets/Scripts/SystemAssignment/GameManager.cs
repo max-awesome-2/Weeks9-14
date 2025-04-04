@@ -50,7 +50,8 @@ public class GameManager : MonoBehaviour
 
 
     // hover info box
-    public GameObject hoverBox;
+    public RectTransform hoverBox;
+    public GameObject hoverBoxParent;
     public TextMeshProUGUI hoverBoxText;
 
     // tower sprite stuff
@@ -118,6 +119,13 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator spawnCoroutine;
 
+    private Vector3 upgradeButtonPos, placeGemsButtonPos;
+    public float buttonInfoRange = 50;
+    private bool inRangeOfUpgradeButton, inRangeOfPlaceGems;
+
+    public string[] gemNames = new string[] { "Emerald", "Sapphire", "Amethyst", "Diamond", "Topaz", "Aquamarine", "Opal", "Ruby" };
+    public string[] tierNames = new string[] { "Chipped", "Flawed", "Normal", "Flawless", "Perfect" };
+
     void Start()
     {
         startScreen.SetActive(true);
@@ -133,6 +141,9 @@ public class GameManager : MonoBehaviour
         wizardTowerGraphic.transform.localScale = Vector3.one * wizardTowerGraphic.transform.localScale.x * tileSize;
 
         pathfinder = GetComponent<Pathfinding>();
+
+        upgradeButtonPos = upgradeChancesButton.transform.position;
+        placeGemsButtonPos = placeGemsButton.transform.position;
 
         // initialize upgrade level chances
         tierChanceUpgradeLevels = new float[][]
@@ -340,6 +351,17 @@ public class GameManager : MonoBehaviour
         if (spawnCoroutine != null) StopCoroutine(spawnCoroutine);
         if (gameState == 1 && onRoundEnd != null) onRoundEnd.Invoke();
 
+        if (grid != null)
+        {
+            for (int x = 0; x < gridSize * 2; x++)
+            {
+                for (int y = 0; y < gridSize * 2; y++)
+                {
+                    if (grid[x][y] == -1) grid[x][y] = 0;
+                }
+            }
+        }
+
         // destroy all towers and enemies, clear all lists
         foreach (Enemy e in enemyList)
         {
@@ -415,6 +437,9 @@ public class GameManager : MonoBehaviour
         placeGemsButton.SetActive(false);
         gemPlacementGraphic.SetActive(true);
 
+        OnMouseExitButton();
+
+
     }
 
     // called when the gamestate / phase changes, handles all logic that happens at the beginning of a phase
@@ -433,9 +458,7 @@ public class GameManager : MonoBehaviour
 
             if (roundNumber == finalRound + 1)
             {
-                gameOver = true;
-                ResetGame();
-                victoryScreen.SetActive(true);
+                OnVictory();
             }
         }
 
@@ -637,6 +660,18 @@ public class GameManager : MonoBehaviour
         t.gameManager = this;
         placedTowers.Add(t);
 
+        if (placedTowers.Count == maxPlacedTowers)
+        {
+            foreach (Tower t2 in placedTowers)
+            {
+                t2.waitingForKeep = true;
+            }
+        }
+
+        // subscribe mouseover events
+        t.onMouseEnter.AddListener(OnHoverObjectOfInterest);
+        t.onMouseExit.AddListener(OnMouseExitObjectOfInterest);
+
         if (placedTowers.Count == maxPlacedTowers) gemPlacementGraphic.SetActive(false);
 
         //block off the new tower’s grid positions in grid
@@ -679,27 +714,57 @@ public class GameManager : MonoBehaviour
 
         if (!gameStarted || gameOver) return;
 
+        if (gameState == 0)
+        {
+            Vector3 mouse = Input.mousePosition;
+            mouse.z = 0;
+            float distFromUpgrade = Vector3.Distance(mouse, upgradeButtonPos);
+            float distFromPlacement = Vector3.Distance(mouse, placeGemsButtonPos);
+
+            if (distFromUpgrade < buttonInfoRange)
+            {
+                if (!inRangeOfUpgradeButton)
+                {
+                    inRangeOfUpgradeButton = true;
+                    OnMouseEnterUpgradeButton();
+                }
+            } else if (inRangeOfUpgradeButton)
+            {
+                inRangeOfUpgradeButton = false;
+
+                OnMouseExitButton();
+            }
+            
+
+            if (!placingGems)
+            {
+                if (distFromPlacement < buttonInfoRange )
+                {
+                    if (!inRangeOfPlaceGems)
+                    {
+                        inRangeOfPlaceGems = true;
+                        OnMouseEnterPlaceGemsButton();
+                    }
+                } else if (inRangeOfPlaceGems)
+                {
+                    inRangeOfPlaceGems = false;
+                    OnMouseExitButton();
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnVictory();
+
+        }
+
         if (gameState == 0 && placingGems)
         {
 
             if (placedTowers.Count == maxPlacedTowers)
             {
-                // dev shortcut - delete all gems and lets you place new ones
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    for (int i = 0; i < placedTowers.Count; i++)
-                    {
-                        for (int x = placedTowers[i].x; x < placedTowers[i].x + 2; x++)
-                        {
-                            for (int y = placedTowers[i].y; y < placedTowers[i].y + 2; y++)
-                            {
-                                grid[x][y] = 0;
-                            }
-                        }
-                        Destroy(placedTowers[i]);
-                    }
-                    placedTowers.Clear();
-                }
+               
 
                 if (Input.GetMouseButtonDown(1))
                 {
@@ -760,10 +825,11 @@ public class GameManager : MonoBehaviour
             if (allEnemiesDead) ChangePhase(0);
         }
 
-        if (hoverBox.activeSelf)
+        if (hoverBox.gameObject.activeSelf)
         {
-            //set hoverbox position to mouse position
-            hoverBox.transform.position = Input.mousePosition;
+            //set hoverbox parent position to mouse position
+            hoverBoxParent.transform.position = Input.mousePosition;
+            
         }
     }
 
@@ -850,6 +916,7 @@ public class GameManager : MonoBehaviour
 
                 // initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
                 t.OnKept(onRoundStart, onRoundEnd, enemyList);
+                t.waitingForKeep = false;
                 keptTowers.Add(t);
 
                 // apply opal bonuses from all existing opal towers that this new tower is in range of
@@ -876,25 +943,41 @@ public class GameManager : MonoBehaviour
     // manage hover info box
     public void OnHoverObjectOfInterest(string hoverInfo)
     {
-        hoverBox.SetActive(true);
+        hoverBox.gameObject.SetActive(true);
         hoverBoxText.text = hoverInfo;
+
+        // set hoverbox local position based on which side of the screen the mouse is closest to
+        int side = 0;
+
+        float x = hoverBoxParent.transform.position.x;
+        float y = hoverBoxParent.transform.position.y;
+
+        int vert, horiz;
+
+        if (x > Screen.width / 2) horiz = -1;
+        else horiz = 1;
+
+        if (y > Screen.height / 2) vert = -1;
+        else vert = 1;
+
+        hoverBox.transform.localPosition = new Vector3(hoverBox.sizeDelta.x / 2 * horiz, hoverBox.sizeDelta.y / 2 * vert);
     }
 
     public void OnMouseExitObjectOfInterest()
     {
-        hoverBox.SetActive(false);
+        hoverBox.gameObject.SetActive(false);
     }
 
     public void OnPauseButtonPressed()
     {
         paused = !paused;
-        gameTimeScale = paused ? 0 : (fastForwarding ? 3 : 1);
+        Time.timeScale = paused ? 0 : (fastForwarding ? 3 : 1);
     }
 
     public void OnFastForwardButtonPressed()
     {
         fastForwarding = !fastForwarding;
-        gameTimeScale = paused ? 0 : (fastForwarding ? 3 : 1);
+        Time.timeScale = paused ? 0 : (fastForwarding ? 3 : 1);
     }
 
     public void UpgradeButtonPressed()
@@ -977,6 +1060,7 @@ public class GameManager : MonoBehaviour
         gameOver = false;
 
         gameOverScreen.SetActive(false);
+        victoryScreen.SetActive(false);
     }
 
     public void StartGameButtonPressed()
@@ -1005,5 +1089,36 @@ public class GameManager : MonoBehaviour
         Vector3 spawnPos = Camera.main.ScreenToWorldPoint(screenPos);
         spawnPos.z = 0;
         ft.InitFloatingText(fText, spawnPos, c, floatDirection, lifetime < 0 ? 3 : ft.lifetime, fontSize < 0 ? ft.text.fontSize : fontSize);
+    }
+    public void OnMouseEnterUpgradeButton()
+    {
+        if (upgradeLevel != tierChanceUpgradeCosts.Length - 1)
+        {
+            OnHoverObjectOfInterest("Upgrade chances for higher tier gems." +
+            $"Upgrade cost: {upgradeGold} gold\n\n" + 
+            $"Current chances: \n" + 
+            $"Chipped: {tierChances[0]}%\n" +
+            $"Flawed: {tierChances[1]}%\n" +
+            $"Normal: {tierChances[2]}%\n" +
+            $"Flawless: {tierChances[3]}%\n" +
+            $"Perfect: {tierChances[4]}%\n");
+        }
+    }
+
+    public void OnMouseExitButton()
+    {
+        OnMouseExitObjectOfInterest();
+    }
+
+    public void OnMouseEnterPlaceGemsButton()
+    {
+        OnHoverObjectOfInterest($"Start placing gems.\n You may place {maxPlacedTowers} gems, then you must choose one to keep by RIGHT-CLICKING it.");
+    }
+
+    private void OnVictory()
+    {
+        gameOver = true;
+        ResetGame();
+        victoryScreen.SetActive(true);
     }
 }
