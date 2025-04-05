@@ -269,7 +269,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
+  m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
   m_Color: {r: 1, g: 0.15566039, b: 0.15566039, a: 1}
   m_FlipX: 0
@@ -307,10 +307,10 @@ MonoBehaviour:
   onKilled:
     m_PersistentCalls:
       m_Calls: []
-  hitSound: {fileID: 0}
   poisonedColor: {r: 0, g: 0.6320754, b: 0, a: 1}
   regularColor: {r: 1, g: 0, b: 0, a: 1}
   frozenColor: {r: 0.50614095, g: 0.50614095, b: 0.8867924, a: 1}
+  gameManager: {fileID: 0}
 --- !u!1 &5785891272346115837
 GameObject:
   m_ObjectHideFlags: 0

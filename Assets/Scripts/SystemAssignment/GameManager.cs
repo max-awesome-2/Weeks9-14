@@ -117,14 +117,21 @@ public class GameManager : MonoBehaviour
     private bool gameOver = false;
     public GameObject startScreen, gameOverScreen, victoryScreen;
 
+    // keep spawn coroutine so we can stop it on a loss
     private IEnumerator spawnCoroutine;
 
+    // vars for popping the hoverbox up for UI buttons (can't use mouseenter or mouseexit on them)
     private Vector3 upgradeButtonPos, placeGemsButtonPos;
     public float buttonInfoRange = 50;
     private bool inRangeOfUpgradeButton, inRangeOfPlaceGems;
 
+    // arrays to convert gem type and gem tier to their names
     public string[] gemNames = new string[] { "Emerald", "Sapphire", "Amethyst", "Diamond", "Topaz", "Aquamarine", "Opal", "Ruby" };
     public string[] tierNames = new string[] { "Chipped", "Flawed", "Normal", "Flawless", "Perfect" };
+
+    // tutorial text variables
+    public GameObject tutorialText1, tutorialText2, tutorialText3, tutorialText4;
+    private bool tutorialDone = false;
 
     void Start()
     {
@@ -329,6 +336,9 @@ public class GameManager : MonoBehaviour
 
         // start first placement phase
         ChangePhase(0);
+
+        // set first tutorial text active
+        tutorialText1.SetActive(true);
     }
 
     private void ResetGame()
@@ -433,6 +443,12 @@ public class GameManager : MonoBehaviour
 
     public void OnPlaceGemsButtonClicked()
     {
+        if (tutorialText1.activeSelf)
+        {
+            tutorialText1.SetActive(false);
+            tutorialText2.SetActive(true);
+        }
+
         placingGems = true;
         placeGemsButton.SetActive(false);
         gemPlacementGraphic.SetActive(true);
@@ -455,6 +471,12 @@ public class GameManager : MonoBehaviour
             // increment round number
             roundNumber++;
             UpdateRoundText();
+
+            // do tutorial text
+            if (!tutorialDone)
+            {
+                tutorialText3.SetActive(true);
+            }
 
             if (roundNumber == finalRound + 1)
             {
@@ -507,6 +529,7 @@ public class GameManager : MonoBehaviour
 
         // cache it for debug
         pathfindingPath = path;
+
 
         float newEnemyHp = baseEnemyHealth * GetEnemyStatRatio(roundNumber);
 
@@ -938,10 +961,20 @@ public class GameManager : MonoBehaviour
                         t2.AddOpalRatio(t.opalBonus);
                     }
                 }
+
+                // set tutorial text
+                tutorialText2.SetActive(false);
+
             }
         }
 
         ChangePhase(1);
+
+        if (tutorialText4.activeSelf && !tutorialDone)
+        {
+            tutorialText4.SetActive(false);
+            tutorialDone = true;
+        }
     }
 
     // manage hover info box
@@ -999,7 +1032,11 @@ public class GameManager : MonoBehaviour
 
         upgradeLevel++;
 
-
+        if (!tutorialDone)
+        {
+            tutorialText3.SetActive(false);
+            tutorialText4.SetActive(true);
+        }
 
 
         UpdateUpgradeChances();

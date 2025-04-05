@@ -55,9 +55,19 @@ public class Enemy : MonoBehaviour
         currentHealth = maxHealth;
 
         targetWaypoint = waypoints[0];
+        this.flying = isFlying;
 
 
         //GetComponent<SpriteRenderer>().sprite = flying ? flyingEnemySprite : groundEnemySprite;
+
+        if (flying)
+        {
+            GetComponent<SpriteRenderer>().flipY = true;
+            regularColor = Color.magenta;
+            GetComponent<SpriteRenderer>().color = regularColor;
+        }
+
+        
     }
 
     void Update()
@@ -174,8 +184,8 @@ public class Enemy : MonoBehaviour
 
         }
 
-        Vector3 offset = Random.insideUnitCircle * Random.Range(0, 0.5f);
-        gameManager.SpawnFloatingText($"-{Mathf.RoundToInt(dmg)}", transform.position + (Vector3.up * 0.1f) + offset, Color.red, 1, 1.5f, 35);
+        Vector3 offset = Random.insideUnitCircle * Random.Range(0, 0.2f);
+        gameManager.SpawnFloatingText($"-{Mathf.RoundToInt(dmg)}", transform.position + (Vector3.up * 0.1f) + offset, Color.red, 0.5f, 1.5f, 35);
     }
 
     void SetHealth(float hp)

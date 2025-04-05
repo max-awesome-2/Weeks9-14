@@ -7,7 +7,7 @@ public class FloatingText : MonoBehaviour
 {
     public TextMeshProUGUI text;
 
-    public int floatDirection = 1;
+    public float floatDirection = 1;
 
     public float floatDistance = 100;
     public float lifetime = 3;
@@ -21,7 +21,7 @@ public class FloatingText : MonoBehaviour
 
     private Vector3 originPos;
 
-    public void InitFloatingText(string text, Vector3 pos, Color c, int floatDirection, float lifetime, float fontSize)
+    public void InitFloatingText(string text, Vector3 pos, Color c, float floatDirection, float lifetime, float fontSize)
     {
         transform.position = pos;
         this.floatDirection = floatDirection;
