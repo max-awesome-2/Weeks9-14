@@ -425,7 +425,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < tierChanceUpgradeLevels.Length; i++)
         {
-            tierChances[i] = tierChanceUpgradeLevels[i][upgradeLevel];
+            tierChances[i] = tierChanceUpgradeLevels[upgradeLevel][i];
         }
 
         // update next level cost
