@@ -256,10 +256,10 @@ public class Tower : MonoBehaviour
 
             if (waitingForKeep)
             {
-                outInfoString = "(RIGHT CLICK TO KEEP THIS GEM)\n" + outInfoString;
+                outInfoString = "(RIGHT CLICK TO KEEP)\n" + outInfoString;
             }
 
-            if (onMouseEnter != null) onMouseEnter.Invoke(infoString);
+            if (onMouseEnter != null) onMouseEnter.Invoke(outInfoString);
 
             rangeIndicator.SetActive(true);
         }

@@ -1457,7 +1457,15 @@ MonoBehaviour:
 
 
     Then,
-    the barbarians will attack.'
+    the barbarians will attack.
+
+
+
+    TIP: If you place two gems of the same TYPE
+    and TIER, keeping one will automatically combine them, upgrading the kept gem
+    by one tier.
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 73a420872e114ac43a0ecf2144984cc0, type: 2}
   m_sharedMaterial: {fileID: -8309165161498307191, guid: 73a420872e114ac43a0ecf2144984cc0, type: 2}
