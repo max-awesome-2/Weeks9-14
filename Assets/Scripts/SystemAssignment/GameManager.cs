@@ -100,8 +100,8 @@ public class GameManager : MonoBehaviour
     // the b value in y = a (b/a)^x
     public float statScalingExponentialHeight = 6.5f;
 
-    // multiplier for how enemy health scales in relation to tower stats - they should scale sliiightly more
-    public float enemyToTowerScalingRatio = 1.1f;
+    // linear extra scaling function x = 1 intercept
+    public float enemyLinearScalingMultMax = 10f;
 
     // unityevents
     private UnityEvent onRoundStart = new UnityEvent(), onRoundEnd = new UnityEvent();
@@ -343,6 +343,10 @@ public class GameManager : MonoBehaviour
 
         // set first tutorial text active
         tutorialText1.SetActive(true);
+
+        print("tower damage at max tier: " + GetTierStatRatio(tierChances.Length - 1) * baseTowerDamage);
+        print("enemy health at final round: " + GetEnemyStatRatio(finalRound) * baseEnemyHealth);
+
     }
 
     private void ResetGame()
@@ -433,9 +437,9 @@ public class GameManager : MonoBehaviour
         }
 
         // update next level cost
-        upgradeGold = tierChanceUpgradeCosts[upgradeLevel];
+        if (upgradeLevel < tierChanceUpgradeCosts.Length) upgradeGold = tierChanceUpgradeCosts[upgradeLevel];
 
-        if (upgradeLevel == tierChanceUpgradeCosts.Length - 1)
+        if (upgradeLevel == tierChanceUpgradeCosts.Length)
         {
             upgradeChancesButtonText.text = "Chances Maxed Out!";
         } else
@@ -575,7 +579,7 @@ public class GameManager : MonoBehaviour
 
     public void OnEnemyKilled()
     {
-        int goldInc = 3 + Mathf.FloorToInt(roundNumber * 1.5f);
+        int goldInc = 2 + Mathf.FloorToInt(roundNumber / 4);
         gold += goldInc;
 
         UpdateGoldText();
@@ -1059,9 +1063,12 @@ public class GameManager : MonoBehaviour
 
     private float GetEnemyStatRatio(int round)
     {
-        float roundRatio = round * (1f / (finalRound - 1));
+        float xVal = (1f * round) / finalRound;
 
-        return GetScaleRatio(statScalingExponentialHeight * enemyToTowerScalingRatio, roundRatio);
+        // y = (a - 1)x + 1
+        float linearMultiplier = (enemyLinearScalingMultMax - 1) * xVal + 1; 
+
+        return GetScaleRatio(statScalingExponentialHeight, xVal) * linearMultiplier;
     }
 
     private float GetScaleRatio(float xAtOneIntercept, float evaluationX)
@@ -1137,17 +1144,15 @@ public class GameManager : MonoBehaviour
     }
     public void OnMouseEnterUpgradeButton()
     {
-        if (upgradeLevel != tierChanceUpgradeCosts.Length - 1)
-        {
             OnHoverObjectOfInterest("Upgrade chances for higher tier gems.\n" +
-            $"Upgrade cost: {upgradeGold} gold\n\n" + 
+            ((upgradeLevel == tierChanceUpgradeCosts.Length) ? "" : $"Upgrade cost: {upgradeGold} gold\n\n") + 
             $"Current chances: \n" + 
             $"Chipped: {tierChances[0]}%\n" +
             $"Flawed: {tierChances[1]}%\n" +
             $"Normal: {tierChances[2]}%\n" +
             $"Flawless: {tierChances[3]}%\n" +
             $"Perfect: {tierChances[4]}%\n");
-        }
+        
     }
 
     public void OnMouseExitButton()
