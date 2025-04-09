@@ -58,10 +58,6 @@ public class Tower : MonoBehaviour
     // the range indicator sprite attached to this tower
     public GameObject rangeIndicator;
 
-    // debug
-    public TextMeshProUGUI tierText;
-
-
     // hover box info string
     private string infoString;
 
@@ -75,8 +71,6 @@ public class Tower : MonoBehaviour
         damage = dmg;
         this.range = range;
         attackSpeed = atkspd;
-
-        tierText.text = gemTier.ToString();
 
         // set range indicator size to match tower range
         Transform prevParent = rangeIndicator.transform.parent;

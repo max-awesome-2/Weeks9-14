@@ -152,7 +152,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2787457721676789864
 RectTransform:
   m_ObjectHideFlags: 0
@@ -360,7 +360,7 @@ MonoBehaviour:
       m_Calls: []
   gameManager: {fileID: 0}
   rangeIndicator: {fileID: 7956089345979726495}
-  tierText: {fileID: 1109794262790543800}
+  waitingForKeep: 0
 --- !u!61 &-6971395286331208238
 BoxCollider2D:
   m_ObjectHideFlags: 0

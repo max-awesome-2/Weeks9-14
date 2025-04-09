@@ -576,9 +576,9 @@ MonoBehaviour:
   enemyPrefab: {fileID: 4991900880365385184, guid: 76d00ac8d5095c64b82e5d339615334f, type: 3}
   projectilePrefab: {fileID: 7046376277679732282, guid: f9306406044d3004e87bb2e2e57820af, type: 3}
   floatingTextPrefab: {fileID: 1313320917462536494, guid: e410d9220b6e9b74d95dd665b6710591, type: 3}
-  grassSprite: {fileID: 0}
-  pathSprite: {fileID: 0}
-  flagstoneSprite: {fileID: 0}
+  grassSprite: {fileID: 21300000, guid: 3e5a1ad1a6072ed4ebb0754df3e71630, type: 3}
+  pathSprite: {fileID: 21300000, guid: 426290dcc9c890643ae893fcd47d5f5f, type: 3}
+  flagstoneSprite: {fileID: 21300000, guid: ce3c46c0f73b2a14ea65e9791399509a, type: 3}
   placeGemsButton: {fileID: 851264418}
   upgradeChancesButton: {fileID: 1636937802}
   gemPlacementGraphic: {fileID: 1105869188}
@@ -587,12 +587,12 @@ MonoBehaviour:
   hoverBoxParent: {fileID: 590865655}
   hoverBoxText: {fileID: 1750492756}
   gemTierSprites:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  rockSprite: {fileID: 0}
+  - {fileID: 21300000, guid: 3506bfeca89e8d741a2564b9d31bd7fc, type: 3}
+  - {fileID: 21300000, guid: 922aae21bc5c2b240815799684d77e06, type: 3}
+  - {fileID: 21300000, guid: 1e1500d81e857fd49a32e0b3aec728a5, type: 3}
+  - {fileID: 21300000, guid: 216c92b632f42004bbd2f95cca037b05, type: 3}
+  - {fileID: 21300000, guid: f806612533f8706498e71a3822005fd1, type: 3}
+  rockSprite: {fileID: 21300000, guid: 0fd568ac50dda754a810e4012012d143, type: 3}
   gemTypeColors:
   - {r: 0, g: 0.8962264, b: 0.07526645, a: 1}
   - {r: 0, g: 0.48307657, b: 1, a: 1}
@@ -1096,8 +1096,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 2747690628134850419, guid: a9716c16a44a94eed9b5c90fbf4d9bdd, type: 3}
-  m_Color: {r: 0.12215203, g: 0.4671008, b: 0.5754717, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 522ebbb48a38b15449a6b6229978e548, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

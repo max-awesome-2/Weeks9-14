@@ -58,13 +58,13 @@ public class Enemy : MonoBehaviour
         this.flying = isFlying;
 
 
-        //GetComponent<SpriteRenderer>().sprite = flying ? flyingEnemySprite : groundEnemySprite;
+        GetComponent<SpriteRenderer>().sprite = flying ? flyingEnemySprite : groundEnemySprite;
 
         if (flying)
         {
             GetComponent<SpriteRenderer>().flipY = true;
-            regularColor = Color.magenta;
-            GetComponent<SpriteRenderer>().color = regularColor;
+            //regularColor = Color.magenta;
+            //GetComponent<SpriteRenderer>().color = regularColor;
         }
 
         

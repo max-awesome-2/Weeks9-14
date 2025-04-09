@@ -218,7 +218,7 @@ public class GameManager : MonoBehaviour
         //grid[22] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         //grid[23] = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-        grid[0] = new int[]   { 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        grid[0] = new int[]   { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[1] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[2] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         grid[3] = new int[]   { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 8, 1, 1, 1, 1, 1, 1, 7, 0, 0, 0, 0 };
@@ -293,8 +293,7 @@ public class GameManager : MonoBehaviour
                 Vector3 gridPos = rowPos + Vector3.right * tileSize * y;
                 GameObject newTile = Instantiate(tilePrefab, gridPos, Quaternion.identity);
                 newTile.transform.localScale = Vector3.one * tileSize;
-                //newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
-                newTile.GetComponent<SpriteRenderer>().color = tileColor; // REMOVE THIS
+                newTile.GetComponent<SpriteRenderer>().sprite = tileSprite;
 
 
                 if (cornerVal > 2)
@@ -568,7 +567,6 @@ public class GameManager : MonoBehaviour
 
         if (currentLives <= 0)
         {
-            // TODO: game over screen + game reset
             ResetGame();
             gameOverScreen.SetActive(true);
             gameOver = true;
@@ -908,28 +906,30 @@ public class GameManager : MonoBehaviour
 
         // set the spriterenderer’s sprite and color according to the tier and color of the gem
         towerRen.color = gemTypeColors[gemType];
-        //towerRen.sprite = gemTierSprites[gemTier];
+        towerRen.sprite = gemTierSprites[gemTier];
     }
 
     void OnKeepTower(int keptIndex)
     {
 
-        //     for towers in placedTowers:
+        //  for towers in placedTowers:
         for (int i = 0; i < placedTowers.Count; i++)
         {
             Tower t = placedTowers[i];
 
             if (i != keptIndex)
             {
-                //         set tower’s sprite to rock sprite and tower’s spriterenderer color to white
+                //  set tower’s sprite to rock sprite and tower’s spriterenderer color to white
+                SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
+                sr.color = Color.white;
+                sr.sprite = rockSprite;
+
                 t.OnNotKept();
 
                 // add to rocks list
                 rocks.Add(t);
 
-                SpriteRenderer sr = t.GetComponent<SpriteRenderer>();
-                sr.color = new Color(0.2f, 0.2f, 0.2f);
-                //sr.sprite = rockSprite;
+
             }
             else
             {
@@ -949,7 +949,10 @@ public class GameManager : MonoBehaviour
 
                 // if the gem is comineable, upgrade its tier by 1 and reset its stats
                 if (combineUpgrade)
+                {
                     SetTowerStats(t, t.gemTier + 1, t.gemType);
+                    t.GetComponent<SpriteRenderer>().sprite = gemTierSprites[t.gemTier + 1];
+                }
 
                 // initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
                 t.OnKept(onRoundStart, onRoundEnd, enemyList);
