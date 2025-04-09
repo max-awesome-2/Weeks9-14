@@ -133,6 +133,10 @@ public class GameManager : MonoBehaviour
     public GameObject tutorialText1, tutorialText2, tutorialText3, tutorialText4;
     private bool tutorialDone = false;
 
+    // flying round indicator text
+    public GameObject flyingText;
+    public float flyingEnemyHealthModifier = 0.65f;
+
     void Start()
     {
         startScreen.SetActive(true);
@@ -498,8 +502,7 @@ public class GameManager : MonoBehaviour
 
 
             placedTowers.Clear();
-
-
+            flyingText.SetActive(false);
         }
         else
         {
@@ -524,6 +527,8 @@ public class GameManager : MonoBehaviour
         //if roundNumber % 5 == 0, it’s a flying enemy round – communicate this via bool parameter in the path generation function call
         bool flyingRound = roundNumber % flyingRoundEvery == 0;
 
+        if (flyingRound) flyingText.SetActive(true);
+
         //use pathfinder to generate enemy path based on grid and waypointCoords
         List<Vector3> path = pathfinder.GetPath(grid, flyingRound);
 
@@ -531,7 +536,7 @@ public class GameManager : MonoBehaviour
         pathfindingPath = path;
 
 
-        float newEnemyHp = baseEnemyHealth * GetEnemyStatRatio(roundNumber);
+        float newEnemyHp = baseEnemyHealth * GetEnemyStatRatio(roundNumber) * (flyingRound ? flyingEnemyHealthModifier : 1);
 
         for (int i = 0; i < enemyCount; i++)
         {
@@ -547,6 +552,7 @@ public class GameManager : MonoBehaviour
 
             yield return new WaitForSeconds(enemySpawnDelay);
         }
+
     }
 
     // when an enemy reaches the tower, subtract lives from the life total and update the UI display
