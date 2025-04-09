@@ -86,11 +86,11 @@ public class Tower : MonoBehaviour
 
         if (gemType == 0)
         {
-            infoString += $"Attacks poison enemies for {poisonTime} seconds, slowing them by {Mathf.RoundToInt(poisonSlow * 100)}% and dealing {Mathf.RoundToInt(poisonDamage)} damage per second.";
+            infoString += $"Attacks poison enemies for {poisonTime} seconds, slowing them by {Mathf.RoundToInt((1 - poisonSlow) * 100)}% and dealing {Mathf.RoundToInt(poisonDamage)} damage per second.";
         }
         else if (gemType == 1)
         {
-            infoString += $"Attacks chill enemies for {freezeTime} seconds, slowing them by {Mathf.RoundToInt(freezeSlow * 100)}%";
+            infoString += $"Attacks chill enemies for {freezeTime} seconds, slowing them by {Mathf.RoundToInt((1 - freezeSlow) * 100)}%";
         }
         else if (gemType == 2)
         {
@@ -189,7 +189,7 @@ public class Tower : MonoBehaviour
                         if (firstNonNull != null) FireProjectile(firstNonNull);
                     }
 
-                    yield return new WaitForSeconds(1 / attackSpeed);
+                    yield return new WaitForSeconds((1 / attackSpeed) / (totalOpalBonusRatio));
 
                 }
             }

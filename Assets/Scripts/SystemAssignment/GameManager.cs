@@ -343,9 +343,6 @@ public class GameManager : MonoBehaviour
         // set first tutorial text active
         tutorialText1.SetActive(true);
 
-        print("tower damage at max tier: " + GetTierStatRatio(tierChances.Length - 1) * baseTowerDamage);
-        print("enemy health at final round: " + GetEnemyStatRatio(finalRound) * baseEnemyHealth);
-
     }
 
     private void ResetGame()
@@ -951,7 +948,7 @@ public class GameManager : MonoBehaviour
                 if (combineUpgrade)
                 {
                     SetTowerStats(t, t.gemTier + 1, t.gemType);
-                    t.GetComponent<SpriteRenderer>().sprite = gemTierSprites[t.gemTier + 1];
+                    t.GetComponent<SpriteRenderer>().sprite = gemTierSprites[t.gemTier];
                 }
 
                 // initialize the tower, passing in the gamemanager’s onroundstart and onroundend events
