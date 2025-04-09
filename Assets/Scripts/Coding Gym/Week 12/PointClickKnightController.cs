@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using Cinemachine;
 
-public class KnightController : MonoBehaviour
+public class PointClickKnightController : MonoBehaviour
 {
     private SpriteRenderer sr;
     private Animator anim;
@@ -20,6 +20,9 @@ public class KnightController : MonoBehaviour
 
     private CinemachineImpulseSource impulseSource;
 
+    private Vector3 target;
+    private bool reachedTarget = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,23 +36,35 @@ public class KnightController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (attacking) return;
 
-        float x = Input.GetAxis("Horizontal"), y = Input.GetAxis("Vertical");
-
-        Vector3 move = (x * Vector3.right + y * Vector3.up);
-        if (move.magnitude > 1) move = move.normalized;
-
-        transform.Translate(move * moveSpeed * Time.deltaTime);
-
-        if (x > 0 && sr.flipX) sr.flipX = false;
-        else if (x < 0 && !sr.flipX) sr.flipX = true;
-
-        anim.SetFloat("speed", move.magnitude);
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetMouseButtonDown(0))
         {
-            anim.SetTrigger("attack");
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            worldPos.z = 0;
+
+            Vector3Int pos = tilemap.WorldToCell(worldPos);
+            TileBase t = tilemap.GetTile(pos);
+
+            if (t != null && t != grassTile)
+            {
+                target = worldPos;
+
+                reachedTarget = false;
+
+                sr.flipX = target.x < transform.position.x;
+
+                anim.SetFloat("speed", 1f);
+            }
+
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, target, Time.deltaTime * moveSpeed);
+
+
+        if (!reachedTarget && Vector3.Distance(transform.position, target) <= 0.05f)
+        {
+            reachedTarget = true;
+            anim.SetFloat("speed", 0f);
         }
 
     }
